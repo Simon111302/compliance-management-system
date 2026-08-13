@@ -1,0 +1,30 @@
+{
+  "name": "my-react-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:api": "node server/index.js",
+    "build": "vite build",
+    "format": "prettier --write \"src/**/*.{js,jsx,css,json}\" \"server/**/*.js\" \"*.{js,json,css,html}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,css,json}\" \"server/**/*.js\" \"*.{js,json,css,html}\"",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongodb": "^7.5.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "oxlint": "^1.75.0",
+    "prettier": "^3.9.6",
+    "vite": "^8.2.0"
+  }
+}
