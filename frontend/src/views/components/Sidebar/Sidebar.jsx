@@ -1,6 +1,6 @@
 import './Sidebar.css'
 
-export function Sidebar({ activePage, onNavigate }) {
+export function Sidebar({ activePage, onLogout, onNavigate }) {
   return (
     <aside className="reviewer-sidebar">
       <button
@@ -44,6 +44,7 @@ export function Sidebar({ activePage, onNavigate }) {
       <button
         className="nav-item"
         type="button"
+        onClick={onLogout}
       >
         Logout
       </button>

@@ -9,10 +9,13 @@ lerna-debug.log*
 
 node_modules
 dist
+frontend/dist
 dist-ssr
 *.local
 .env
 .env.*
+.oxlintrc.json
+.prettierrc.json
 
 # Editor directories and files
 .vscode/*

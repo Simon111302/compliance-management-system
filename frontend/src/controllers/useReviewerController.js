@@ -26,7 +26,7 @@ const emptyForm = {
   status: 'Draft',
 }
 
-export function useReviewerController() {
+export function useReviewerController(enabled = true) {
   const [compliances, setCompliances] = useState([])
   const [page, setPage] = useState('dashboard')
   const [selectedId, setSelectedId] = useState(null)
@@ -50,6 +50,8 @@ export function useReviewerController() {
     compliances.find((item) => item.id === selectedId) ?? null
 
   useEffect(() => {
+    if (!enabled) return undefined
+
     let active = true
 
     getCompliances()
@@ -63,7 +65,7 @@ export function useReviewerController() {
     return () => {
       active = false
     }
-  }, [])
+  }, [enabled])
 
   function notify(message) {
     setToast(message)

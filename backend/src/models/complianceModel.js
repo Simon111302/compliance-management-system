@@ -1,0 +1,47 @@
+export const initialCompliances = [
+  {
+    id: 'COMP-001',
+    name: 'Govt Contribution Employee',
+    type: 'Government Contribution',
+    reporter: 'Reporter 1',
+    dueDate: '2026-08-20',
+    priority: 'Urgent',
+    status: 'Pending Evidence',
+    notes: 'Employee government contribution compliance.',
+    evidence: {
+      fileName: 'employee_information.pdf',
+      remarks: 'Employee information document submitted.',
+    },
+    reviewerComments: '',
+  },
+  {
+    id: 'COMP-002',
+    name: 'Tax Compliance',
+    type: 'Tax Compliance',
+    reporter: 'Reporter 2',
+    dueDate: '2026-08-22',
+    priority: 'High',
+    status: 'Approved',
+    notes: 'Quarterly tax records and payment confirmations.',
+    evidence: {
+      fileName: 'tax_compliance_q2.pdf',
+      remarks: 'Tax payment receipts submitted for review.',
+    },
+    reviewerComments: 'Evidence is complete and accurate.',
+  },
+  {
+    id: 'COMP-003',
+    name: 'Employee Records',
+    type: 'Employee Records',
+    reporter: 'Reporter 3',
+    dueDate: '2026-08-25',
+    priority: 'Medium',
+    status: 'Partial',
+    notes: 'Validate employee records for the current reporting period.',
+    evidence: {
+      fileName: 'employee_records.pdf',
+      remarks: 'Core employee records submitted; supporting forms are pending.',
+    },
+    reviewerComments: 'Please provide the missing supporting forms.',
+  },
+]

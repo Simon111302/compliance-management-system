@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:api": "node server/index.js",
-    "build": "vite build",
-    "format": "prettier --write \"src/**/*.{js,jsx,css,json}\" \"server/**/*.js\" \"*.{js,json,css,html}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,css,json}\" \"server/**/*.js\" \"*.{js,json,css,html}\"",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "dev": "vite --config frontend/vite.config.js",
+    "dev:api": "node backend/src/server.js",
+    "build": "vite build --config frontend/vite.config.js",
+    "format": "prettier --write \"frontend/src/**/*.{js,jsx,css,json}\" \"backend/src/**/*.js\" \"frontend/*.{js,json,css,html}\" \"*.{js,json,css,html}\"",
+    "format:check": "prettier --check \"frontend/src/**/*.{js,jsx,css,json}\" \"backend/src/**/*.js\" \"frontend/*.{js,json,css,html}\" \"*.{js,json,css,html}\"",
+    "lint": "oxlint frontend/src backend/src",
+    "test": "node --test frontend/src/models/complianceModel.test.js",
+    "preview": "vite preview --config frontend/vite.config.js"
   },
   "dependencies": {
     "dotenv": "^17.4.2",

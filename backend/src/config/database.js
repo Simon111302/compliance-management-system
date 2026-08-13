@@ -1,14 +1,7 @@
-import 'dotenv/config'
 import { MongoClient } from 'mongodb'
+import { databaseName, mongoUri } from './env.js'
 
-const uri = process.env.MONGODB_URI
-const databaseName = process.env.MONGODB_DATABASE
-
-if (!uri || !databaseName) {
-  throw new Error('MONGODB_URI and MONGODB_DATABASE must be defined in .env')
-}
-
-const client = new MongoClient(uri)
+const client = new MongoClient(mongoUri)
 let database
 
 export async function connectDatabase() {
