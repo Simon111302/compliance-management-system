@@ -1,4 +1,5 @@
 import { adminEmail, adminName, adminPassword } from '../config/env.js'
+import { createAdminDocument, normalizeEmail } from '../models/userModel.js'
 import { hashPassword } from '../utils/crypto.js'
 
 function splitName(name) {
@@ -10,22 +11,18 @@ function splitName(name) {
 }
 
 export async function ensureAdminUser(database) {
-  const email = adminEmail.trim().toLowerCase()
+  const email = normalizeEmail(adminEmail)
   const users = database.collection('users')
 
   if (await users.findOne({ email })) return false
 
   const { firstName, lastName } = splitName(adminName)
-  await users.insertOne({
-    firstName,
-    lastName,
-    name: adminName.trim(),
-    email,
-    passwordHash: hashPassword(adminPassword),
-    status: 'Active',
-    role: 'Admin',
-    createdAt: new Date(),
-  })
+  await users.insertOne(
+    createAdminDocument(
+      { email, firstName, lastName },
+      hashPassword(adminPassword),
+    ),
+  )
 
   return true
 }

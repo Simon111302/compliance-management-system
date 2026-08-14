@@ -64,6 +64,8 @@
   grid-column: 1 / -1;
 }
 .evidence-content {
+  display: grid;
+  gap: 12px;
   padding: 22px 24px 25px;
 }
 .file-tile {
@@ -107,6 +109,26 @@
 .compact {
   min-height: 34px;
   padding: 0 11px;
+}
+.evidence-reference {
+  display: grid;
+  gap: 5px;
+  padding: 12px 15px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fff;
+}
+.evidence-reference strong {
+  color: #718286;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.evidence-reference a,
+.evidence-reference p {
+  margin: 0;
+  color: var(--teal);
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 .remarks {
   margin-top: 20px;

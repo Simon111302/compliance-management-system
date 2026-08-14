@@ -1,4 +1,9 @@
 import {
+  activeUserFilter,
+  normalizeEmail,
+  serializeAuthenticatedUser,
+} from '../models/userModel.js'
+import {
   createSessionToken,
   hashSession,
   verifyPassword,
@@ -6,10 +11,6 @@ import {
 
 const cookieName = 'compliance_session'
 const sessionDays = 7
-
-export function normalizeEmail(email) {
-  return email.trim().toLowerCase()
-}
 
 export function readSessionToken(request) {
   const cookies =
@@ -40,7 +41,7 @@ export async function authenticate(request, response, next) {
 
     const user = await database.collection('users').findOne({
       _id: session.userId,
-      status: { $ne: 'Inactive' },
+      ...activeUserFilter,
     })
 
     if (!user) {
@@ -60,7 +61,7 @@ export async function authenticate(request, response, next) {
 export async function authenticateUser(database, email, password) {
   const user = await database
     .collection('users')
-    .findOne({ email: normalizeEmail(email), status: { $ne: 'Inactive' } })
+    .findOne({ email: normalizeEmail(email), ...activeUserFilter })
 
   if (!user || !verifyPassword(password, user.passwordHash)) return null
 
@@ -73,7 +74,7 @@ export async function authenticateUser(database, email, password) {
 
   return {
     token,
-    user: { email: user.email, name: user.name, role: user.role },
+    user: serializeAuthenticatedUser(user),
   }
 }
 

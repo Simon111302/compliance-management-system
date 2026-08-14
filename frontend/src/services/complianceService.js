@@ -52,6 +52,22 @@ export function saveCompliance(compliance) {
   })
 }
 
+export function uploadComplianceEvidence(complianceId, file) {
+  return request(`${apiUrl}/${complianceId}/evidence`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'X-File-Name': encodeURIComponent(file.name),
+      'X-File-Type': file.type,
+    },
+    body: file,
+  })
+}
+
+export function evidenceUrl(complianceId, fileId) {
+  return `${apiUrl}/${complianceId}/evidence/${fileId}`
+}
+
 export function submitComplianceForm(complianceId, submission) {
   return request(`${apiUrl}/${complianceId}/submission`, {
     method: 'PUT',

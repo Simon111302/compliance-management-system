@@ -39,6 +39,8 @@ export function AppRoutes({ controller, readOnly = false, role = 'Reviewer' }) {
     updateForm,
     updateSubmissionDetails,
     updateSubmissionEmployee,
+    updateSubmissionEvidence,
+    updateSubmissionEvidenceFile,
     updateSubmissionRow,
   } = controller
 
@@ -85,6 +87,8 @@ export function AppRoutes({ controller, readOnly = false, role = 'Reviewer' }) {
           onSubmit={submitComplianceForm}
           onUpdateDetails={updateSubmissionDetails}
           onUpdateEmployee={updateSubmissionEmployee}
+          onUpdateEvidence={updateSubmissionEvidence}
+          onUpdateEvidenceFile={updateSubmissionEvidenceFile}
           onUpdateRow={updateSubmissionRow}
         />
       )

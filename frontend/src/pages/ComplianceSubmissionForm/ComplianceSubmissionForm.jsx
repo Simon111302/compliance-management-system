@@ -53,6 +53,8 @@ export function ComplianceSubmissionForm({
   onSubmit,
   onUpdateDetails,
   onUpdateEmployee,
+  onUpdateEvidence,
+  onUpdateEvidenceFile,
   onUpdateRow,
 }) {
   const definition = submissionFormDefinitions[compliance.type]
@@ -160,6 +162,43 @@ export function ComplianceSubmissionForm({
             </div>
           </section>
         )}
+
+        <section className="submission-section evidence-section">
+          <div>
+            <h2>Evidence</h2>
+            <p>Upload one file or provide an evidence reference/link.</p>
+          </div>
+          <div className="submission-field-grid evidence-field-grid">
+            <label className="field">
+              <span>Evidence File</span>
+              <input
+                accept=".pdf,.jpg,.jpeg,.png,.webp,.txt"
+                type="file"
+                onChange={(event) =>
+                  onUpdateEvidenceFile(event.target.files?.[0] ?? null)
+                }
+              />
+            </label>
+            <label className="field">
+              <span>Evidence Reference or Link</span>
+              <input
+                maxLength="1000"
+                placeholder="https://... or document reference"
+                type="text"
+                value={form.evidence.reference}
+                onChange={(event) =>
+                  onUpdateEvidence('reference', event.target.value)
+                }
+              />
+            </label>
+          </div>
+          <div className="evidence-guidance">
+            <small>PDF, JPG, PNG, WebP, or TXT. Maximum 10 MB.</small>
+            {form.evidenceFile && (
+              <strong>Selected: {form.evidenceFile.name}</strong>
+            )}
+          </div>
+        </section>
 
         <div className="submission-actions">
           <button

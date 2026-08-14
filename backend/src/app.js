@@ -22,6 +22,10 @@ export function createApp(database) {
     response.setHeader('Referrer-Policy', 'no-referrer')
     next()
   })
+  app.use(
+    '/api/compliances/:id/evidence',
+    express.raw({ limit: '10mb', type: 'application/octet-stream' }),
+  )
   app.use(express.json({ limit: '100kb' }))
 
   app.get('/api/health', async (_request, response, next) => {

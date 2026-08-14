@@ -4,6 +4,7 @@ import {
   StatusBadge,
 } from '../../views/components/Badge/Badge.jsx'
 import { formatDueDate } from '../../models/complianceModel.js'
+import { evidenceUrl } from '../../services/complianceService.js'
 import './ComplianceDetails.css'
 
 export function ComplianceDetails({
@@ -105,6 +106,45 @@ export function ComplianceDetails({
                     View Form
                   </button>
                 </div>
+                {compliance.submission.evidence?.file && (
+                  <div className="file-tile">
+                    <div>
+                      <strong>
+                        {compliance.submission.evidence.file.filename}
+                      </strong>
+                      <small>Uploaded evidence</small>
+                    </div>
+                    <a
+                      className="secondary-button compact"
+                      href={evidenceUrl(
+                        compliance.id,
+                        compliance.submission.evidence.file.fileId,
+                      )}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      View File
+                    </a>
+                  </div>
+                )}
+                {compliance.submission.evidence?.reference && (
+                  <div className="evidence-reference">
+                    <strong>Evidence Reference or Link</strong>
+                    {/^https?:\/\//i.test(
+                      compliance.submission.evidence.reference,
+                    ) ? (
+                      <a
+                        href={compliance.submission.evidence.reference}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {compliance.submission.evidence.reference}
+                      </a>
+                    ) : (
+                      <p>{compliance.submission.evidence.reference}</p>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="empty-state compact-empty">

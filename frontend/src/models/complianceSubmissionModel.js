@@ -1,3 +1,12 @@
+export const evidenceFields = [
+  {
+    key: 'reference',
+    label: 'Evidence Reference or Link',
+    type: 'url',
+    optional: true,
+  },
+]
+
 export const submissionFormDefinitions = {
   'Government Contribution': {
     employeeTitle: 'Employee Information',
@@ -160,6 +169,8 @@ export function createSubmissionForm(type) {
     details: Object.fromEntries(
       definition.detailFields.map(({ key }) => [key, '']),
     ),
+    evidence: { reference: '' },
+    evidenceFile: null,
   }
 }
 
@@ -178,5 +189,7 @@ export function normalizeSubmissionForm(type, submission) {
       label: row.label,
     })),
     details: { ...empty.details, ...submission.details },
+    evidence: { ...empty.evidence, ...submission.evidence },
+    evidenceFile: null,
   }
 }

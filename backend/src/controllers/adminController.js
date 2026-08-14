@@ -1,5 +1,11 @@
 import { hashPassword } from '../utils/crypto.js'
 import { createReviewerActionDocument } from '../models/reviewerActionModel.js'
+import {
+  createUserDocument,
+  serializeUser,
+  updateUserDocument,
+  userRoles,
+} from '../models/userModel.js'
 import { listAuditEvents, logAuditEvent } from '../services/auditService.js'
 import {
   parseObjectId,
@@ -9,45 +15,6 @@ import {
   validateUpdateUser,
   validationMessage,
 } from '../validators/adminValidators.js'
-
-function serializeUser(user) {
-  const { passwordHash: _passwordHash, ...safeUser } = user
-  return safeUser
-}
-
-function normalizeEmail(email) {
-  return email.trim().toLowerCase()
-}
-
-function userDocument(
-  input,
-  passwordHash,
-  status = 'Active',
-  createdAt = new Date(),
-) {
-  const firstName = input.firstName.trim()
-  const lastName = input.lastName.trim()
-
-  return {
-    firstName,
-    lastName,
-    name: `${firstName} ${lastName}`,
-    email: normalizeEmail(input.email),
-    passwordHash,
-    status,
-    role: input.role,
-    createdAt,
-  }
-}
-
-function userUpdate(input, existingUser) {
-  return userDocument(
-    input,
-    existingUser.passwordHash,
-    existingUser.status ?? 'Active',
-    existingUser.createdAt ?? new Date(),
-  )
-}
 
 function auditIdentity(request) {
   return {
@@ -91,9 +58,7 @@ export async function getDashboard(request, response, next) {
     const database = request.app.locals.database
     const users = database.collection('users')
     const [totalUsers, reviewers, reporters, issues] = await Promise.all([
-      users.countDocuments({
-        role: { $in: ['Admin', 'Reviewer', 'Reporter'] },
-      }),
+      users.countDocuments({ role: { $in: userRoles } }),
       users.countDocuments({ role: 'Reviewer' }),
       users.countDocuments({ role: 'Reporter' }),
       database
@@ -138,7 +103,7 @@ export async function createUser(request, response, next) {
 
   try {
     const database = request.app.locals.database
-    const document = userDocument(
+    const document = createUserDocument(
       request.body,
       hashPassword(request.body.password),
     )
@@ -182,7 +147,7 @@ export async function updateUser(request, response, next) {
       return
     }
 
-    const document = userUpdate(request.body, existingUser)
+    const document = updateUserDocument(request.body, existingUser)
     await users.replaceOne({ _id: userId }, document)
 
     if (document.status === 'Inactive') {

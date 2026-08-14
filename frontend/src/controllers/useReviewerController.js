@@ -20,6 +20,7 @@ import {
   saveCompliance as saveComplianceRequest,
   saveReview,
   submitComplianceForm as submitComplianceFormRequest,
+  uploadComplianceEvidence,
 } from '../services/complianceService.js'
 
 const emptyForm = {
@@ -168,6 +169,17 @@ export function useReviewerController(enabled = true, loadReporters = true) {
     }))
   }
 
+  function updateSubmissionEvidence(field, value) {
+    setSubmissionForm((current) => ({
+      ...current,
+      evidence: { ...current.evidence, [field]: value },
+    }))
+  }
+
+  function updateSubmissionEvidenceFile(file) {
+    setSubmissionForm((current) => ({ ...current, evidenceFile: file }))
+  }
+
   function openCreate() {
     const reporterId = reporters[0]?.id ?? ''
     const reporter = reporters.find((item) => item.id === reporterId)
@@ -257,11 +269,16 @@ export function useReviewerController(enabled = true, loadReporters = true) {
 
     setSubmittingForm(true)
     try {
-      const saved = applyAutomaticComplianceStatus(
-        await submitComplianceFormRequest(
+      if (submissionForm.evidenceFile) {
+        await uploadComplianceEvidence(
           selectedCompliance.id,
-          submissionForm,
-        ),
+          submissionForm.evidenceFile,
+        )
+      }
+
+      const { evidenceFile: _evidenceFile, ...submission } = submissionForm
+      const saved = applyAutomaticComplianceStatus(
+        await submitComplianceFormRequest(selectedCompliance.id, submission),
       )
       setCompliances((items) => updateCompliance(items, saved))
       setSubmissionForm(createSubmissionForm(saved.type))
@@ -327,6 +344,8 @@ export function useReviewerController(enabled = true, loadReporters = true) {
     updateForm,
     updateSubmissionDetails,
     updateSubmissionEmployee,
+    updateSubmissionEvidence,
+    updateSubmissionEvidenceFile,
     updateSubmissionRow,
   }
 }

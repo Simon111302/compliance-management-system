@@ -153,7 +153,22 @@ function sanitizeFields(input, rules, prefix, errors) {
   )
 }
 
-export function validateComplianceSubmission(type, input) {
+function sanitizeEvidence(input, hasUploadedFile, errors) {
+  const reference = sanitizeField(
+    input?.reference ?? '',
+    { optional: true, maxLength: 1000 },
+    'evidence.reference',
+    errors,
+  )
+
+  if (!reference && !hasUploadedFile) {
+    errors.push('Upload an evidence file or provide an evidence reference/link')
+  }
+
+  return { reference }
+}
+
+export function validateComplianceSubmission(type, input, hasUploadedFile) {
   const schema = submissionSchemas[type]
   const errors = []
 
@@ -195,10 +210,11 @@ export function validateComplianceSubmission(type, input) {
     'details',
     errors,
   )
+  const evidence = sanitizeEvidence(input.evidence, hasUploadedFile, errors)
 
   return {
     valid: errors.length === 0,
     errors,
-    data: { employeeInformation, rows, details },
+    data: { employeeInformation, rows, details, evidence },
   }
 }

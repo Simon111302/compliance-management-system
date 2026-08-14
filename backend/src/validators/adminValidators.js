@@ -1,11 +1,10 @@
 import { ObjectId } from 'mongodb'
+import { userRoles } from '../models/userModel.js'
 import {
   reviewerActionSeverities,
   reviewerActionStatuses,
   reviewerActionTypes,
 } from '../models/reviewerActionModel.js'
-
-export const userRoles = ['Admin', 'Reviewer', 'Reporter']
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 

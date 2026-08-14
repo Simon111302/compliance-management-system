@@ -37,6 +37,40 @@
 .submission-field-grid .field-wide {
   grid-column: 1 / -1;
 }
+.evidence-section > div:first-child {
+  margin-bottom: 20px;
+}
+.evidence-section > div:first-child h2 {
+  margin-bottom: 6px;
+}
+.evidence-section > div:first-child p,
+.evidence-guidance small {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.evidence-field-grid {
+  align-items: end;
+}
+.evidence-guidance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+.evidence-guidance strong {
+  color: var(--ink);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+.evidence-section input[type='file'] {
+  height: auto;
+  min-height: 42px;
+  padding: 8px;
+}
 .submission-field-grid input,
 .submission-field-grid select,
 .submission-field-grid textarea,
@@ -144,6 +178,13 @@
   }
   .submission-field-grid .field-wide {
     grid-column: auto;
+  }
+  .evidence-guidance {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .evidence-guidance strong {
+    text-align: left;
   }
   .submission-section {
     padding: 20px 16px;

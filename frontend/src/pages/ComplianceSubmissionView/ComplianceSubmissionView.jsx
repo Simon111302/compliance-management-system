@@ -1,4 +1,5 @@
 import { submissionFormDefinitions } from '../../models/complianceSubmissionModel.js'
+import { evidenceUrl } from '../../services/complianceService.js'
 import './ComplianceSubmissionView.css'
 
 function valueOrDash(value) {
@@ -98,6 +99,51 @@ export function ComplianceSubmissionView({ compliance, onBack }) {
               </dl>
             </section>
           )}
+
+          <section className="submission-section">
+            <h2>Evidence</h2>
+            <dl className="submission-data-grid">
+              <div>
+                <dt>Reference or Link</dt>
+                <dd>
+                  {submission.evidence?.reference ? (
+                    /^https?:\/\//i.test(submission.evidence.reference) ? (
+                      <a
+                        href={submission.evidence.reference}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {submission.evidence.reference}
+                      </a>
+                    ) : (
+                      submission.evidence.reference
+                    )
+                  ) : (
+                    '—'
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>Uploaded File</dt>
+                <dd>
+                  {submission.evidence?.file ? (
+                    <a
+                      href={evidenceUrl(
+                        compliance.id,
+                        submission.evidence.file.fileId,
+                      )}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      {submission.evidence.file.filename}
+                    </a>
+                  ) : (
+                    '—'
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </section>
         </div>
       )}
     </div>

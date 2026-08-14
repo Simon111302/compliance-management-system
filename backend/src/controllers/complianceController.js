@@ -1,5 +1,10 @@
-import { ObjectId } from 'mongodb'
+import { GridFSBucket, ObjectId } from 'mongodb'
 import { logAuditEvent } from '../services/auditService.js'
+import {
+  createEvidenceFileMetadata,
+  evidenceMaxBytes,
+  isEvidenceMimeType,
+} from '../models/evidenceModel.js'
 import {
   validateComplianceSubmission,
   validateReviewInput,
@@ -7,6 +12,12 @@ import {
 
 function collection(request) {
   return request.app.locals.database.collection('compliances')
+}
+
+function evidenceBucket(request) {
+  return new GridFSBucket(request.app.locals.database, {
+    bucketName: 'evidenceFiles',
+  })
 }
 
 function withoutMongoId(document) {
@@ -63,6 +74,14 @@ function assignedReporterFilter(request) {
       },
     ],
   }
+}
+
+function evidenceAccessFilter(request) {
+  return request.user.role === 'Reporter' ? assignedReporterFilter(request) : {}
+}
+
+function safeFilename(value) {
+  return value.replace(/[\r\n"\\/]/g, '_')
 }
 
 export async function listCompliances(request, response, next) {
@@ -173,6 +192,7 @@ export async function replaceCompliance(request, response, next) {
       id: request.params.id,
       status: statusForDueDate(existingCompliance.status, request.body.dueDate),
       submission: existingCompliance.submission ?? null,
+      evidenceFile: existingCompliance.evidenceFile ?? null,
       reviewerComments: existingCompliance.reviewerComments ?? '',
     }
     await collection(request).replaceOne({ id: request.params.id }, compliance)
@@ -184,6 +204,138 @@ export async function replaceCompliance(request, response, next) {
       `Updated compliance ${request.params.id}`,
     )
     response.json(compliance)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function uploadComplianceEvidence(request, response, next) {
+  try {
+    const reporterFilter = {
+      id: request.params.id,
+      ...assignedReporterFilter(request),
+    }
+    const compliance = await collection(request).findOne(reporterFilter)
+    if (!compliance) {
+      response.status(404).json({ message: 'Assigned compliance not found' })
+      return
+    }
+
+    const contentType = request.get('x-file-type')
+    const encodedFilename = request.get('x-file-name')
+    if (!Buffer.isBuffer(request.body) || request.body.length === 0) {
+      response.status(400).json({ message: 'Select an evidence file' })
+      return
+    }
+    if (request.body.length > evidenceMaxBytes) {
+      response
+        .status(413)
+        .json({ message: 'Evidence file must be 10 MB or less' })
+      return
+    }
+    if (!isEvidenceMimeType(contentType)) {
+      response.status(400).json({
+        message: 'Evidence must be a PDF, JPG, PNG, WebP, or text file',
+      })
+      return
+    }
+
+    let filename
+    try {
+      filename = safeFilename(decodeURIComponent(encodedFilename ?? ''))
+    } catch {
+      filename = ''
+    }
+    if (!filename) {
+      response.status(400).json({ message: 'Evidence filename is required' })
+      return
+    }
+
+    const bucket = evidenceBucket(request)
+    const upload = bucket.openUploadStream(filename, {
+      metadata: {
+        complianceId: compliance.id,
+        contentType,
+        uploadedBy: request.user._id,
+      },
+    })
+    await new Promise((resolve, reject) => {
+      upload.on('finish', resolve)
+      upload.on('error', reject)
+      upload.end(request.body)
+    })
+
+    const file = createEvidenceFileMetadata({
+      fileId: upload.id,
+      filename,
+      contentType,
+      size: request.body.length,
+      uploadedBy: request.user._id,
+      uploadedByEmail: request.user.email,
+    })
+    await collection(request).updateOne(reporterFilter, {
+      $set: { evidenceFile: file },
+    })
+
+    const previousFileId = compliance.evidenceFile?.fileId
+    if (previousFileId && !previousFileId.equals?.(upload.id)) {
+      await bucket.delete(previousFileId).catch(() => undefined)
+    }
+
+    await auditCompliance(
+      request,
+      'UPLOAD_EVIDENCE',
+      request.params.id,
+      `Uploaded evidence ${filename} for compliance ${request.params.id}`,
+    )
+    response.status(201).json(file)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export async function downloadComplianceEvidence(request, response, next) {
+  try {
+    if (!ObjectId.isValid(request.params.fileId)) {
+      response.status(400).json({ message: 'Invalid evidence file id' })
+      return
+    }
+
+    const fileId = ObjectId.createFromHexString(request.params.fileId)
+    const compliance = await collection(request).findOne({
+      id: request.params.id,
+      ...evidenceAccessFilter(request),
+      $and: [
+        {
+          $or: [
+            { 'evidenceFile.fileId': fileId },
+            { 'submission.evidence.file.fileId': fileId },
+          ],
+        },
+      ],
+    })
+    if (!compliance) {
+      response.status(404).json({ message: 'Evidence not found' })
+      return
+    }
+
+    const bucket = evidenceBucket(request)
+    const storedFile = await bucket.find({ _id: fileId }).next()
+    if (!storedFile) {
+      response.status(404).json({ message: 'Evidence not found' })
+      return
+    }
+
+    const contentType = storedFile.metadata?.contentType
+    response.setHeader(
+      'Content-Type',
+      contentType || 'application/octet-stream',
+    )
+    response.setHeader(
+      'Content-Disposition',
+      `inline; filename="${safeFilename(storedFile.filename)}"`,
+    )
+    bucket.openDownloadStream(fileId).on('error', next).pipe(response)
   } catch (error) {
     next(error)
   }
@@ -201,9 +353,12 @@ export async function submitComplianceForm(request, response, next) {
       return
     }
 
+    const existingEvidenceFile =
+      compliance.evidenceFile ?? compliance.submission?.evidence?.file ?? null
     const validation = validateComplianceSubmission(
       compliance.type,
       request.body,
+      Boolean(existingEvidenceFile),
     )
     if (!validation.valid) {
       response.status(400).json({ message: validation.errors.join('; ') })
@@ -213,19 +368,36 @@ export async function submitComplianceForm(request, response, next) {
     const submission = {
       type: compliance.type,
       ...validation.data,
+      evidence: {
+        ...validation.data.evidence,
+        file: existingEvidenceFile,
+      },
       submittedAt: new Date(),
       submittedBy: request.user._id,
       submittedByEmail: request.user.email,
     }
     const status = statusForDueDate('Pending Evidence', compliance.dueDate)
+    const priorSubmittedFileId =
+      compliance.submission?.evidence?.file?.fileId ?? null
     const result = await collection(request).findOneAndUpdate(
       reporterFilter,
-      { $set: { submission, status } },
+      { $set: { submission, status }, $unset: { evidenceFile: '' } },
       { returnDocument: 'after' },
     )
     if (!result) {
       response.status(404).json({ message: 'Assigned compliance not found' })
       return
+    }
+
+    const submittedFileId = submission.evidence.file?.fileId
+    if (
+      priorSubmittedFileId &&
+      submittedFileId &&
+      !priorSubmittedFileId.equals?.(submittedFileId)
+    ) {
+      await evidenceBucket(request)
+        .delete(priorSubmittedFileId)
+        .catch(() => undefined)
     }
 
     await auditCompliance(
