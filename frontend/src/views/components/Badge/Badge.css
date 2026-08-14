@@ -11,11 +11,11 @@
   line-height: 1;
   white-space: nowrap;
 }
-.status-draft,
 .priority-low {
   color: #66777c;
   background: #f7f9f8;
 }
+.status-pending,
 .status-pending-evidence,
 .priority-high {
   color: #94601f;
@@ -31,6 +31,7 @@
   background: #f3f9fb;
 }
 .status-rejected,
+.status-overdue,
 .priority-urgent {
   color: #a1483f;
   background: #fdf6f5;

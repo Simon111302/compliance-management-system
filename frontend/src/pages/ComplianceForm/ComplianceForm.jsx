@@ -7,7 +7,6 @@ export function ComplianceForm({
   types,
   reporters,
   priorities,
-  statuses,
   onUpdate,
   onCancel,
   onSubmit,
@@ -19,7 +18,7 @@ export function ComplianceForm({
         title={editing ? 'Edit Compliance' : 'Create Compliance'}
         description={
           editing
-            ? 'Update the compliance assignment and status.'
+            ? 'Update the compliance assignment and details.'
             : 'Assign a new compliance item to a reporter.'
         }
       />
@@ -52,11 +51,21 @@ export function ComplianceForm({
             <label className="field">
               <span>Reporter</span>
               <select
-                value={form.reporter}
-                onChange={(event) => onUpdate('reporter', event.target.value)}
+                required
+                disabled={reporters.length === 0}
+                value={form.reporterId}
+                onChange={(event) => onUpdate('reporterId', event.target.value)}
               >
+                {reporters.length === 0 && (
+                  <option value="">No active reporters available</option>
+                )}
                 {reporters.map((reporter) => (
-                  <option key={reporter}>{reporter}</option>
+                  <option
+                    key={reporter.id}
+                    value={reporter.id}
+                  >
+                    {reporter.name}
+                  </option>
                 ))}
               </select>
             </label>
@@ -89,19 +98,6 @@ export function ComplianceForm({
                 placeholder="Add instructions or context for the reporter"
               />
             </label>
-            <label className="field">
-              <span>Status</span>
-              <select
-                value={form.status}
-                onChange={(event) => onUpdate('status', event.target.value)}
-              >
-                {statuses
-                  .filter((status) => status !== 'All')
-                  .map((status) => (
-                    <option key={status}>{status}</option>
-                  ))}
-              </select>
-            </label>
           </div>
           <div className="form-actions">
             <button
@@ -113,6 +109,7 @@ export function ComplianceForm({
             </button>
             <button
               className="primary-button"
+              disabled={reporters.length === 0}
               type="submit"
             >
               {editing ? 'Save Changes' : 'Create Compliance'}

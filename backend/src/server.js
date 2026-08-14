@@ -1,13 +1,13 @@
 import { closeDatabase, connectDatabase } from './config/database.js'
 import { port } from './config/env.js'
-import { seedReviewer } from './services/authService.js'
-import { initialCompliances } from './models/complianceModel.js'
+import { ensureAdminUser } from './services/adminBootstrapService.js'
 import { createApp, prepareDatabase } from './app.js'
 
 async function start() {
   const database = await connectDatabase()
-  await seedReviewer(database)
-  await prepareDatabase(database, initialCompliances)
+  await database.collection('users').createIndex({ email: 1 }, { unique: true })
+  await prepareDatabase(database)
+  await ensureAdminUser(database)
 
   const app = createApp(database)
   app.listen(port, () => {

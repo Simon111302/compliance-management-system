@@ -1,7 +1,8 @@
 export const complianceStatuses = [
   'All',
-  'Draft',
+  'Pending',
   'Pending Evidence',
+  'Overdue',
   'Approved',
   'Partial',
   'Rejected',
@@ -13,55 +14,24 @@ export const complianceTypes = [
   'Employee Records',
   'Regulatory Filing',
 ]
-export const reporters = ['Reporter 1', 'Reporter 2', 'Reporter 3']
 
-export const initialCompliances = [
-  {
-    id: 'COMP-001',
-    name: 'Govt Contribution Employee',
-    type: 'Government Contribution',
-    reporter: 'Reporter 1',
-    dueDate: '2026-08-20',
-    priority: 'Urgent',
-    status: 'Pending Evidence',
-    notes: 'Employee government contribution compliance.',
-    evidence: {
-      fileName: 'employee_information.pdf',
-      remarks: 'Employee information document submitted.',
-    },
-    reviewerComments: '',
-  },
-  {
-    id: 'COMP-002',
-    name: 'Tax Compliance',
-    type: 'Tax Compliance',
-    reporter: 'Reporter 2',
-    dueDate: '2026-08-22',
-    priority: 'High',
-    status: 'Approved',
-    notes: 'Quarterly tax records and payment confirmations.',
-    evidence: {
-      fileName: 'tax_compliance_q2.pdf',
-      remarks: 'Tax payment receipts submitted for review.',
-    },
-    reviewerComments: 'Evidence is complete and accurate.',
-  },
-  {
-    id: 'COMP-003',
-    name: 'Employee Records',
-    type: 'Employee Records',
-    reporter: 'Reporter 3',
-    dueDate: '2026-08-25',
-    priority: 'Medium',
-    status: 'Partial',
-    notes: 'Validate employee records for the current reporting period.',
-    evidence: {
-      fileName: 'employee_records.pdf',
-      remarks: 'Core employee records submitted; supporting forms are pending.',
-    },
-    reviewerComments: 'Please provide the missing supporting forms.',
-  },
-]
+export function applyAutomaticComplianceStatus(compliance, today = new Date()) {
+  if (
+    !compliance.dueDate ||
+    ['Approved', 'Rejected'].includes(compliance.status)
+  ) {
+    return compliance
+  }
+
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  const currentDate = `${year}-${month}-${day}`
+
+  return compliance.dueDate < currentDate
+    ? { ...compliance, status: 'Overdue' }
+    : compliance
+}
 
 export function filterCompliances(compliances, search, status) {
   const query = search.trim().toLowerCase()
@@ -86,12 +56,13 @@ export function createCompliance(compliances, form) {
     id: `COMP-${String(nextNumber).padStart(3, '0')}`,
     name: form.name.trim(),
     type: form.type,
+    reporterId: form.reporterId,
     reporter: form.reporter,
     dueDate: form.dueDate,
     priority: form.priority,
     status: form.status,
     notes: form.notes.trim(),
-    evidence: null,
+    submission: null,
     reviewerComments: '',
   }
 }

@@ -7,11 +7,18 @@ export function hashPassword(password) {
 }
 
 export function verifyPassword(password, storedPassword) {
-  const [salt, key] = storedPassword.split(':')
-  const derivedKey = crypto.scryptSync(password, salt, 64).toString('hex')
-  return crypto.timingSafeEqual(
-    Buffer.from(key, 'hex'),
-    Buffer.from(derivedKey, 'hex'),
+  if (typeof storedPassword !== 'string') return false
+
+  const [salt, key, ...extra] = storedPassword.split(':')
+  if (!salt || !key || extra.length > 0 || !/^[a-f\d]{128}$/i.test(key)) {
+    return false
+  }
+
+  const derivedKey = crypto.scryptSync(password, salt, 64)
+  const storedKey = Buffer.from(key, 'hex')
+  return (
+    storedKey.length === derivedKey.length &&
+    crypto.timingSafeEqual(storedKey, derivedKey)
   )
 }
 

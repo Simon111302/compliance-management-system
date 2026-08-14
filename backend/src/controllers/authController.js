@@ -9,7 +9,7 @@ import { validateLoginInput } from '../validators/requestValidators.js'
 
 export async function login(request, response, next) {
   try {
-    const email = request.body.email?.trim()
+    const email = request.body.email?.trim().toLowerCase()
     const { password } = request.body
 
     if (!validateLoginInput(email, password)) {

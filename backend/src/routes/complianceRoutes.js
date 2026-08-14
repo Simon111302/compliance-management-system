@@ -1,18 +1,23 @@
 import { Router } from 'express'
 import { authenticate } from '../services/authService.js'
+import { requireRoles } from '../middleware/roleAuthorization.js'
 import {
   createCompliance,
   listCompliances,
+  listReporters,
   replaceCompliance,
   reviewCompliance,
+  submitComplianceForm,
 } from '../controllers/complianceController.js'
 
 const router = Router()
 
 router.use(authenticate)
-router.get('/', listCompliances)
-router.post('/', createCompliance)
-router.put('/:id', replaceCompliance)
-router.patch('/:id/review', reviewCompliance)
+router.get('/', requireRoles('Admin', 'Reviewer', 'Reporter'), listCompliances)
+router.get('/reporters', requireRoles('Reviewer'), listReporters)
+router.post('/', requireRoles('Reviewer'), createCompliance)
+router.put('/:id', requireRoles('Reviewer'), replaceCompliance)
+router.put('/:id/submission', requireRoles('Reporter'), submitComplianceForm)
+router.patch('/:id/review', requireRoles('Reviewer'), reviewCompliance)
 
 export default router

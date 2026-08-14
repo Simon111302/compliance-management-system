@@ -7,6 +7,8 @@ import { formatDueDate } from '../../models/complianceModel.js'
 import './ComplianceDetails.css'
 
 export function ComplianceDetails({
+  canEdit = true,
+  canReview = true,
   compliance,
   decision,
   comments,
@@ -14,6 +16,7 @@ export function ComplianceDetails({
   onComments,
   onBack,
   onEdit,
+  onOpenSubmission,
   onSubmitReview,
 }) {
   if (!compliance) return null
@@ -32,13 +35,15 @@ export function ComplianceDetails({
             >
               Back
             </button>
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={() => onEdit(compliance.id)}
-            >
-              Edit
-            </button>
+            {canEdit && (
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => onEdit(compliance.id)}
+              >
+                Edit
+              </button>
+            )}
           </div>
         }
       />
@@ -81,78 +86,77 @@ export function ComplianceDetails({
           <section className="panel evidence-card">
             <div className="panel-heading">
               <div>
-                <h2>Evidence</h2>
-                <p>Files and remarks submitted by the reporter.</p>
+                <h2>Compliance Form</h2>
+                <p>Structured information submitted by the reporter.</p>
               </div>
             </div>
-            {compliance.evidence ? (
+            {compliance.submission ? (
               <div className="evidence-content">
                 <div className="file-tile">
                   <div>
-                    <strong>{compliance.evidence.fileName}</strong>
+                    <strong>{compliance.type} form</strong>
                     <small>Submitted by {compliance.reporter}</small>
                   </div>
                   <button
                     className="secondary-button compact"
                     type="button"
+                    onClick={() => onOpenSubmission(compliance.id)}
                   >
-                    View File
+                    View Form
                   </button>
-                </div>
-                <div className="remarks">
-                  <span>Reporter Remarks</span>
-                  <p>{compliance.evidence.remarks}</p>
                 </div>
               </div>
             ) : (
               <div className="empty-state compact-empty">
-                <strong>Evidence not submitted</strong>
-                <p>The reporter has not attached evidence yet.</p>
+                <strong>Form not submitted</strong>
+                <p>The reporter has not submitted the compliance form yet.</p>
               </div>
             )}
           </section>
         </div>
-        <form
-          className="panel review-card"
-          onSubmit={onSubmitReview}
-        >
-          <div>
-            <p className="eyebrow">Reviewer decision</p>
-            <h2>Review</h2>
-            <p>Select a decision after checking the submitted evidence.</p>
-          </div>
-          <fieldset>
-            <legend>Decision</legend>
-            <div className="decision-options">
-              {['Approve', 'Partial', 'Reject'].map((item) => (
-                <button
-                  key={item}
-                  className={`decision-button decision-${item.toLowerCase()} ${decision === item ? 'selected' : ''}`}
-                  type="button"
-                  onClick={() => onDecision(item)}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-          <label className="field">
-            <span>Reviewer Comments</span>
-            <textarea
-              rows="6"
-              value={comments}
-              onChange={(event) => onComments(event.target.value)}
-              placeholder="Add feedback or explain the decision"
-            />
-          </label>
-          <button
-            className="primary-button full-button"
-            type="submit"
-            disabled={!decision}
+        {canReview && (
+          <form
+            className="panel review-card"
+            onSubmit={onSubmitReview}
           >
-            Submit Review
-          </button>
-        </form>
+            <div>
+              <p className="eyebrow">Reviewer decision</p>
+              <h2>Review</h2>
+              <p>Select a decision after checking the submitted evidence.</p>
+            </div>
+            <fieldset>
+              <legend>Decision</legend>
+              <div className="decision-options">
+                {['Approve', 'Partial', 'Reject'].map((item) => (
+                  <button
+                    key={item}
+                    className={`decision-button decision-${item.toLowerCase()} ${decision === item ? 'selected' : ''}`}
+                    type="button"
+                    onClick={() => onDecision(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <label className="field">
+              <span>Reviewer Comments</span>
+              <textarea
+                rows="6"
+                value={comments}
+                onChange={(event) => onComments(event.target.value)}
+                placeholder="Add feedback or explain the decision"
+              />
+            </label>
+            <button
+              className="primary-button full-button"
+              type="submit"
+              disabled={!decision}
+            >
+              Submit Review
+            </button>
+          </form>
+        )}
       </div>
     </>
   )

@@ -2,8 +2,10 @@ import { Dashboard } from '../pages/Dashboard/Dashboard.jsx'
 import { ComplianceList } from '../pages/ComplianceList/ComplianceList.jsx'
 import { ComplianceForm } from '../pages/ComplianceForm/ComplianceForm.jsx'
 import { ComplianceDetails } from '../pages/ComplianceDetails/ComplianceDetails.jsx'
+import { ComplianceSubmissionForm } from '../pages/ComplianceSubmissionForm/ComplianceSubmissionForm.jsx'
+import { ComplianceSubmissionView } from '../pages/ComplianceSubmissionView/ComplianceSubmissionView.jsx'
 
-export function AppRoutes({ controller }) {
+export function AppRoutes({ controller, readOnly = false, role = 'Reviewer' }) {
   const {
     compliancePriorities,
     complianceStatuses,
@@ -17,6 +19,7 @@ export function AppRoutes({ controller }) {
     openCreate,
     openDetails,
     openEdit,
+    openSubmission,
     page,
     reporters,
     reviewerComments,
@@ -28,9 +31,15 @@ export function AppRoutes({ controller }) {
     setSearch,
     setStatusFilter,
     statusFilter,
+    submissionForm,
+    submitComplianceForm,
     submitReview,
+    submittingForm,
     summary,
     updateForm,
+    updateSubmissionDetails,
+    updateSubmissionEmployee,
+    updateSubmissionRow,
   } = controller
 
   if (page === 'dashboard')
@@ -45,7 +54,15 @@ export function AppRoutes({ controller }) {
   if (page === 'compliance')
     return (
       <ComplianceList
+        canCreate={!readOnly}
+        canEdit={!readOnly}
         compliances={filteredCompliances}
+        description={
+          readOnly
+            ? 'View compliance records assigned to your account.'
+            : 'Create, review, and manage compliance records.'
+        }
+        eyebrow={`${role} workspace`}
         search={search}
         statusFilter={statusFilter}
         statuses={complianceStatuses}
@@ -53,10 +70,34 @@ export function AppRoutes({ controller }) {
         onStatusFilter={setStatusFilter}
         onCreate={openCreate}
         onOpenDetails={openDetails}
+        onOpenSubmission={openSubmission}
         onEdit={openEdit}
       />
     )
-  if (page === 'create')
+  if (page === 'submission') {
+    if (readOnly && role === 'Reporter') {
+      return (
+        <ComplianceSubmissionForm
+          compliance={selectedCompliance}
+          form={submissionForm}
+          submitting={submittingForm}
+          onBack={() => navigate('compliance')}
+          onSubmit={submitComplianceForm}
+          onUpdateDetails={updateSubmissionDetails}
+          onUpdateEmployee={updateSubmissionEmployee}
+          onUpdateRow={updateSubmissionRow}
+        />
+      )
+    }
+
+    return (
+      <ComplianceSubmissionView
+        compliance={selectedCompliance}
+        onBack={() => navigate('compliance')}
+      />
+    )
+  }
+  if (page === 'create' && !readOnly)
     return (
       <ComplianceForm
         editing={Boolean(editingId)}
@@ -64,7 +105,6 @@ export function AppRoutes({ controller }) {
         types={complianceTypes}
         reporters={reporters}
         priorities={compliancePriorities}
-        statuses={complianceStatuses}
         onUpdate={updateForm}
         onCancel={() => navigate('compliance')}
         onSubmit={saveCompliance}
@@ -72,6 +112,8 @@ export function AppRoutes({ controller }) {
     )
   return (
     <ComplianceDetails
+      canEdit={!readOnly}
+      canReview={!readOnly}
       compliance={selectedCompliance}
       decision={decision}
       comments={reviewerComments}
@@ -79,6 +121,7 @@ export function AppRoutes({ controller }) {
       onComments={setReviewerComments}
       onBack={() => navigate('compliance')}
       onEdit={openEdit}
+      onOpenSubmission={openSubmission}
       onSubmitReview={submitReview}
     />
   )

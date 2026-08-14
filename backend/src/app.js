@@ -1,14 +1,28 @@
 import express from 'express'
 import { connectDatabase } from './config/database.js'
-import { databaseName } from './config/env.js'
+import { databaseName, frontendOrigin } from './config/env.js'
 import authRoutes from './routes/authRoutes.js'
+import adminRoutes from './routes/adminRoutes.js'
 import complianceRoutes from './routes/complianceRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 
 export function createApp(database) {
   const app = express()
   app.locals.database = database
-  app.use(express.json())
+  app.disable('x-powered-by')
+  app.use((request, response, next) => {
+    const origin = request.get('origin')
+    if (origin && origin !== frontendOrigin) {
+      response.status(403).json({ message: 'Origin is not allowed' })
+      return
+    }
+
+    response.setHeader('X-Content-Type-Options', 'nosniff')
+    response.setHeader('X-Frame-Options', 'DENY')
+    response.setHeader('Referrer-Policy', 'no-referrer')
+    next()
+  })
+  app.use(express.json({ limit: '100kb' }))
 
   app.get('/api/health', async (_request, response, next) => {
     try {
@@ -20,24 +34,24 @@ export function createApp(database) {
   })
 
   app.use('/api/auth', authRoutes)
+  app.use('/api/admin', adminRoutes)
   app.use('/api/compliances', complianceRoutes)
   app.use(errorHandler)
 
   return app
 }
 
-export async function prepareDatabase(database, initialCompliances) {
-  await database
-    .collection('compliances')
-    .createIndex({ id: 1 }, { unique: true })
-  await database
-    .collection('sessions')
-    .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
-
-  const collection = database.collection('compliances')
-  if ((await collection.countDocuments()) === 0) {
-    await collection.insertMany(initialCompliances)
-  }
+export async function prepareDatabase(database) {
+  await Promise.all([
+    database.collection('compliances').createIndex({ id: 1 }, { unique: true }),
+    database
+      .collection('sessions')
+      .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    database
+      .collection('reviewerActions')
+      .createIndex({ reviewerId: 1, createdAt: -1 }),
+    database.collection('auditLogs').createIndex({ createdAt: -1 }),
+  ])
 }
 
 export { connectDatabase }

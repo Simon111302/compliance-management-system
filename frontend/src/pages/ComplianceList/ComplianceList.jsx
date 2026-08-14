@@ -7,7 +7,11 @@ import { formatDueDate } from '../../models/complianceModel.js'
 import './ComplianceList.css'
 
 export function ComplianceList({
+  canCreate = true,
+  canEdit = true,
   compliances,
+  eyebrow = 'Reviewer workspace',
+  description = 'Create, review, and manage compliance records.',
   search,
   statusFilter,
   statuses,
@@ -15,22 +19,25 @@ export function ComplianceList({
   onStatusFilter,
   onCreate,
   onOpenDetails,
+  onOpenSubmission,
   onEdit,
 }) {
   return (
     <>
       <PageHeader
-        eyebrow="Reviewer workspace"
+        eyebrow={eyebrow}
         title="Compliance"
-        description="Create, review, and manage compliance records."
+        description={description}
         action={
-          <button
-            className="primary-button"
-            type="button"
-            onClick={onCreate}
-          >
-            Create Compliance
-          </button>
+          canCreate ? (
+            <button
+              className="primary-button"
+              type="button"
+              onClick={onCreate}
+            >
+              Create Compliance
+            </button>
+          ) : null
         }
       />
       <div className="reviewer-content">
@@ -81,8 +88,14 @@ export function ComplianceList({
                       </button>
                     </td>
                     <td>
-                      <strong>{compliance.name}</strong>
-                      <small>{compliance.type}</small>
+                      <button
+                        className="compliance-name-link"
+                        type="button"
+                        onClick={() => onOpenSubmission(compliance.id)}
+                      >
+                        <strong>{compliance.name}</strong>
+                        <small>{compliance.type}</small>
+                      </button>
                     </td>
                     <td>{compliance.reporter}</td>
                     <td>{formatDueDate(compliance.dueDate, true)}</td>
@@ -100,12 +113,14 @@ export function ComplianceList({
                         >
                           View
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => onEdit(compliance.id)}
-                        >
-                          Edit
-                        </button>
+                        {canEdit && (
+                          <button
+                            type="button"
+                            onClick={() => onEdit(compliance.id)}
+                          >
+                            Edit
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

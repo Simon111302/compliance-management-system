@@ -1,11 +1,28 @@
-const apiUrl = '/api/compliances'
+import { apiUrl as apiBaseUrl } from '../config/api.js'
+
+const apiUrl = `${apiBaseUrl}/compliances`
 
 async function request(url, options) {
-  const response = await fetch(url, options)
+  const response = await fetch(url, {
+    credentials: 'include',
+    ...options,
+  })
 
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}))
-    throw new Error(body.message ?? 'Compliance request failed')
+    const contentType = response.headers.get('content-type') ?? ''
+    const body = contentType.includes('application/json')
+      ? await response.json().catch(() => ({}))
+      : {}
+
+    if (response.status === 404 && url.endsWith('/submission')) {
+      throw new Error(
+        'The API server is out of date. Restart the backend server.',
+      )
+    }
+
+    throw new Error(
+      body.message ?? `Compliance request failed (${response.status})`,
+    )
   }
 
   return response.json()
@@ -13,6 +30,10 @@ async function request(url, options) {
 
 export function getCompliances() {
   return request(apiUrl)
+}
+
+export function getReporters() {
+  return request(`${apiUrl}/reporters`)
 }
 
 export function addCompliance(compliance) {
@@ -28,6 +49,14 @@ export function saveCompliance(compliance) {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(compliance),
+  })
+}
+
+export function submitComplianceForm(complianceId, submission) {
+  return request(`${apiUrl}/${complianceId}/submission`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(submission),
   })
 }
 

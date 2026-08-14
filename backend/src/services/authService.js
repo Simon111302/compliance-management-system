@@ -1,6 +1,5 @@
 import {
   createSessionToken,
-  hashPassword,
   hashSession,
   verifyPassword,
 } from '../utils/crypto.js'
@@ -8,28 +7,8 @@ import {
 const cookieName = 'compliance_session'
 const sessionDays = 7
 
-export async function seedReviewer(database) {
-  const email = process.env.REVIEWER_EMAIL
-  const password = process.env.REVIEWER_PASSWORD
-
-  if (!email || !password) {
-    throw new Error(
-      'REVIEWER_EMAIL and REVIEWER_PASSWORD must be defined in .env',
-    )
-  }
-
-  const users = database.collection('users')
-  await users.createIndex({ email: 1 }, { unique: true })
-  const existing = await users.findOne({ email })
-
-  if (!existing) {
-    await users.insertOne({
-      email,
-      name: process.env.REVIEWER_NAME ?? 'Alex Rivera',
-      passwordHash: hashPassword(password),
-      role: 'Reviewer',
-    })
-  }
+export function normalizeEmail(email) {
+  return email.trim().toLowerCase()
 }
 
 export function readSessionToken(request) {
@@ -40,32 +19,48 @@ export function readSessionToken(request) {
 }
 
 export async function authenticate(request, response, next) {
-  const token = readSessionToken(request)
-  const database = request.app.locals.database
+  try {
+    const token = readSessionToken(request)
+    const database = request.app.locals.database
 
-  if (!token) {
-    response.status(401).json({ message: 'Authentication required' })
-    return
+    if (!token) {
+      response.status(401).json({ message: 'Authentication required' })
+      return
+    }
+
+    const session = await database.collection('sessions').findOne({
+      tokenHash: hashSession(token),
+      expiresAt: { $gt: new Date() },
+    })
+
+    if (!session) {
+      response.status(401).json({ message: 'Session expired' })
+      return
+    }
+
+    const user = await database.collection('users').findOne({
+      _id: session.userId,
+      status: { $ne: 'Inactive' },
+    })
+
+    if (!user) {
+      await database.collection('sessions').deleteOne({ _id: session._id })
+      clearSessionCookie(response)
+      response.status(401).json({ message: 'Account is unavailable' })
+      return
+    }
+
+    request.user = user
+    next()
+  } catch (error) {
+    next(error)
   }
-
-  const session = await database.collection('sessions').findOne({
-    tokenHash: hashSession(token),
-    expiresAt: { $gt: new Date() },
-  })
-
-  if (!session) {
-    response.status(401).json({ message: 'Session expired' })
-    return
-  }
-
-  request.user = await database
-    .collection('users')
-    .findOne({ _id: session.userId })
-  next()
 }
 
 export async function authenticateUser(database, email, password) {
-  const user = await database.collection('users').findOne({ email })
+  const user = await database
+    .collection('users')
+    .findOne({ email: normalizeEmail(email), status: { $ne: 'Inactive' } })
 
   if (!user || !verifyPassword(password, user.passwordHash)) return null
 

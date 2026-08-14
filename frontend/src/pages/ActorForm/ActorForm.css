@@ -1,0 +1,35 @@
+.permissions-field {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.permissions-field legend {
+  margin-bottom: 10px;
+  color: #53676c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.permissions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.permissions-grid label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: #46595d;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .permissions-grid {
+    grid-template-columns: 1fr;
+  }
+}

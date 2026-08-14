@@ -1,6 +1,15 @@
 import './Sidebar.css'
 
-export function Sidebar({ activePage, onLogout, onNavigate }) {
+export function Sidebar({ activePage, onLogout, onNavigate, user }) {
+  const isReviewer = user.role === 'Reviewer'
+  const workspace = isReviewer ? 'Reviewer workspace' : 'Reporter workspace'
+  const initials = user.name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+
   return (
     <aside className="reviewer-sidebar">
       <button
@@ -10,8 +19,8 @@ export function Sidebar({ activePage, onLogout, onNavigate }) {
       >
         Compliance
       </button>
-      <p className="sidebar-label">Reviewer workspace</p>
-      <nav aria-label="Reviewer navigation">
+      <p className="sidebar-label">{workspace}</p>
+      <nav aria-label={`${user.role} navigation`}>
         <button
           className={
             activePage === 'dashboard' ? 'nav-item active' : 'nav-item'
@@ -23,7 +32,9 @@ export function Sidebar({ activePage, onLogout, onNavigate }) {
         </button>
         <button
           className={
-            ['compliance', 'create', 'details'].includes(activePage)
+            ['compliance', 'create', 'details', 'submission'].includes(
+              activePage,
+            )
               ? 'nav-item active'
               : 'nav-item'
           }
@@ -49,10 +60,10 @@ export function Sidebar({ activePage, onLogout, onNavigate }) {
         Logout
       </button>
       <div className="reviewer-profile">
-        <span className="avatar">AR</span>
+        <span className="avatar">{initials}</span>
         <span>
-          <strong>Alex Rivera</strong>
-          <small>Reviewer</small>
+          <strong>{user.name}</strong>
+          <small>{user.role}</small>
         </span>
       </div>
     </aside>

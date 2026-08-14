@@ -1,0 +1,158 @@
+.reporter-submission-page {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 36px 42px 60px;
+}
+.submission-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.submission-heading h1 {
+  margin: 4px 0 8px;
+}
+.submission-heading > div > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.submission-form {
+  overflow: hidden;
+}
+.submission-section {
+  padding: 26px;
+  border-bottom: 1px solid var(--line);
+}
+.submission-section h2 {
+  margin-bottom: 20px;
+  font-size: 17px;
+}
+.submission-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.submission-field-grid .field-wide {
+  grid-column: 1 / -1;
+}
+.submission-field-grid input,
+.submission-field-grid select,
+.submission-field-grid textarea,
+.submission-table input,
+.submission-table select {
+  width: 100%;
+  border: 1px solid #ccd9d6;
+  border-radius: 6px;
+  color: var(--ink);
+  background: #fff;
+}
+.submission-field-grid input,
+.submission-field-grid select {
+  height: 42px;
+  padding: 0 11px;
+}
+.submission-field-grid textarea {
+  min-height: 90px;
+  padding: 10px 11px;
+  resize: vertical;
+}
+.submission-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.submission-table {
+  min-width: 760px;
+  white-space: normal;
+}
+.submission-table th,
+.submission-table td {
+  min-width: 145px;
+  padding: 10px;
+  vertical-align: middle;
+}
+.submission-table th:first-child {
+  min-width: 170px;
+}
+.submission-table tbody th {
+  color: var(--ink);
+  background: #fbfdfc;
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.submission-table input,
+.submission-table select {
+  min-width: 125px;
+  height: 38px;
+  padding: 0 9px;
+}
+.choice-group {
+  min-width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.choice-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #53676c;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.choice-group input {
+  width: 15px;
+  min-width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--teal);
+}
+.prefixed-input {
+  position: relative;
+}
+.prefixed-input > span {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  z-index: 1;
+  color: var(--muted);
+  transform: translateY(-50%);
+}
+.prefixed-input input {
+  padding-left: 27px;
+}
+.submission-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 22px 26px;
+}
+
+@media (max-width: 720px) {
+  .reporter-submission-page {
+    padding: 20px 14px 40px;
+  }
+  .submission-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .submission-field-grid {
+    grid-template-columns: 1fr;
+  }
+  .submission-field-grid .field-wide {
+    grid-column: auto;
+  }
+  .submission-section {
+    padding: 20px 16px;
+  }
+  .submission-actions {
+    flex-direction: column-reverse;
+    padding: 18px 16px;
+  }
+  .submission-actions button {
+    width: 100%;
+  }
+}

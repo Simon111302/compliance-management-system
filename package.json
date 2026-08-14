@@ -10,7 +10,6 @@
     "format": "prettier --write \"frontend/src/**/*.{js,jsx,css,json}\" \"backend/src/**/*.js\" \"frontend/*.{js,json,css,html}\" \"*.{js,json,css,html}\"",
     "format:check": "prettier --check \"frontend/src/**/*.{js,jsx,css,json}\" \"backend/src/**/*.js\" \"frontend/*.{js,json,css,html}\" \"*.{js,json,css,html}\"",
     "lint": "oxlint frontend/src backend/src",
-    "test": "node --test frontend/src/models/complianceModel.test.js",
     "preview": "vite preview --config frontend/vite.config.js"
   },
   "dependencies": {

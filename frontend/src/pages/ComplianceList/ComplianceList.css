@@ -61,6 +61,31 @@
 .action-group button:hover {
   background: var(--teal-soft);
 }
+.compliance-name-link {
+  display: grid;
+  gap: 3px;
+  padding: 3px 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.compliance-name-link strong {
+  color: var(--teal);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.compliance-name-link:hover strong,
+.compliance-name-link:focus-visible strong {
+  color: #116b65;
+}
+.compliance-name-link:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
 
 @media (max-width: 720px) {
   .list-tools {
