@@ -98,8 +98,10 @@ export function useComplianceController(
           reporter: current.reporter || reporterUsers[0]?.name || '',
         }))
       })
-      .catch(() => {
-        if (active) setToast('Unable to connect to the compliance database')
+      .catch((error: unknown) => {
+        if (active) {
+          setToast(getErrorMessage(error, 'Unable to load compliance records'))
+        }
       })
 
     return () => {
@@ -377,17 +379,20 @@ export function useComplianceController(
     if (!selectedCompliance || !decision) return
 
     try {
-      const reviewed = applyAutomaticComplianceStatus(
-        await saveReview(selectedCompliance.id, decision, reviewerComments),
-      )
+      const reviewed = {
+        ...applyAutomaticComplianceStatus(
+          await saveReview(selectedCompliance.id, decision, reviewerComments),
+        ),
+        reporter: selectedCompliance.reporter,
+      }
       setCompliances((items) => updateCompliance(items, reviewed))
       notify(
         `${selectedCompliance.id} marked ${decision === 'Approve' ? 'Approved' : decision}`,
       )
       setCurrentPage('compliance')
       setSelectedId(null)
-    } catch {
-      notify('Unable to submit review')
+    } catch (error) {
+      notify(getErrorMessage(error, 'Unable to submit review'))
     }
   }
 

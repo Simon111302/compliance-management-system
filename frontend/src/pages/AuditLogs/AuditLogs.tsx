@@ -29,7 +29,10 @@ export function AuditLogs({ logs }: AuditLogsProps) {
               <tbody>
                 {logs.map((log) => (
                   <tr key={log.id ?? log._id}>
-                    <td>{log.userName ?? log.userEmail ?? 'System'}</td>
+                    <td>
+                      {log.userName ?? log.userEmail ?? 'System'}
+                      {log.userRole ? ` (${log.userRole})` : ''}
+                    </td>
                     <td>{log.action}</td>
                     <td>{log.entity}</td>
                     <td>{log.description}</td>

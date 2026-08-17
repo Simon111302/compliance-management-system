@@ -18,8 +18,7 @@ import { requireRoles } from '../middleware/role.middleware.js'
 
 const router = Router()
 
-router.use(authenticate)
-router.use(requireRoles('Admin'))
+router.use(['/users', '/roles'], authenticate, requireRoles('Admin'))
 
 router.get('/users', listUsers)
 router.get('/users/:userId', getUser)

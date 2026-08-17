@@ -5,8 +5,11 @@ export const auditActions = [
   'CREATE',
   'UPDATE',
   'DELETE',
+  'LOGIN',
+  'LOGOUT',
   'RESET_PASSWORD',
   'UPLOAD_EVIDENCE',
+  'VIEW_EVIDENCE',
   'SUBMIT',
   'REVIEW',
 ] as const

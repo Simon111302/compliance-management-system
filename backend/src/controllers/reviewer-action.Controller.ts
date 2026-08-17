@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express'
+import { recordActivity } from '../services/audit.Service.js'
 import {
   createReviewerAction as createReviewerActionRecord,
   deleteReviewerAction as deleteReviewerActionRecord,
@@ -65,6 +66,13 @@ export const createReviewerAction: RequestHandler = async (
       reviewer,
       request.user._id,
     )
+    await recordActivity(database, request.user, {
+      action: 'CREATE',
+      entityType: 'ReviewerAction',
+      entityId: action._id.toHexString(),
+      description: `Recorded ${action.type} for ${action.reviewerName}`,
+      details: { severity: action.severity, status: action.status },
+    })
     response.status(201).json(action)
   } catch (error) {
     next(error)
@@ -97,6 +105,13 @@ export const updateReviewerAction: RequestHandler<{
       return
     }
 
+    await recordActivity(database, request.user, {
+      action: 'UPDATE',
+      entityType: 'ReviewerAction',
+      entityId: action._id.toHexString(),
+      description: `Updated ${action.type} for ${action.reviewerName}`,
+      details: { severity: action.severity, status: action.status },
+    })
     response.json(action)
   } catch (error) {
     next(error)
@@ -118,6 +133,12 @@ export const deleteReviewerAction: RequestHandler<{
       return
     }
 
+    await recordActivity(request.app.locals.database, request.user, {
+      action: 'DELETE',
+      entityType: 'ReviewerAction',
+      entityId: actionId.toHexString(),
+      description: `Deleted reviewer action ${actionId.toHexString()}`,
+    })
     response.status(204).end()
   } catch (error) {
     next(error)

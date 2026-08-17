@@ -7,9 +7,7 @@ import userRoutes from './routes/user.routes.js'
 import complianceRoutes from './routes/compliance.routes.js'
 import reviewerActionRoutes from './routes/reviewer-action.routes.js'
 import auditRoutes from './routes/audit.routes.js'
-import { authenticate } from './middleware/auth.middleware.js'
 import { errorMiddleware } from './middleware/error.middleware.js'
-import { requireRoles } from './middleware/role.middleware.js'
 import { evidenceUpload } from './middleware/upload.middleware.js'
 
 export function createApp(database: Db): Express {
@@ -40,12 +38,7 @@ export function createApp(database: Db): Express {
   })
 
   app.use('/v1/auth', authRoutes)
-  app.use(
-    '/v1/compliances/:id/evidence',
-    authenticate,
-    requireRoles('Admin', 'Reviewer'),
-    evidenceUpload,
-  )
+  app.use('/v1/compliances/:id/evidence', evidenceUpload)
   app.use('/v1', userRoutes)
   app.use('/v1', reviewerActionRoutes)
   app.use('/v1', auditRoutes)

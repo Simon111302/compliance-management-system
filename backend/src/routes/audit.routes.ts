@@ -11,8 +11,7 @@ import { requireRoles } from '../middleware/role.middleware.js'
 
 const router = Router()
 
-router.use(authenticate)
-router.use(requireRoles('Admin'))
+router.use('/audits', authenticate, requireRoles('Admin'))
 router.get('/audits', listAudits)
 router.get('/audits/:auditId', getAudit)
 router.post('/audits', createAudit)

@@ -3,6 +3,7 @@ export interface AuditLog {
   _id?: string
   userName?: string
   userEmail?: string
+  userRole?: string
   action: string
   entity?: string
   description: string

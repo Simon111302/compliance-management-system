@@ -1,4 +1,5 @@
 import { apiRequest, jsonOptions } from '../config/api'
+import { toCompliance, type ApiCompliance } from './compliance.service'
 import type { Compliance, Reporter, ReviewDecision } from '../types'
 
 const compliancePath = '/compliances'
@@ -11,14 +12,15 @@ export function getReporters(): Promise<Reporter[]> {
   )
 }
 
-export function saveReview(
+export async function saveReview(
   complianceId: string,
   decision: Exclude<ReviewDecision, ''>,
   comments: string,
 ): Promise<Compliance> {
-  return apiRequest(
+  const reviewed = await apiRequest<ApiCompliance>(
     `${compliancePath}/${complianceId}/review`,
     jsonOptions('PATCH', { comments, decision }),
     'Compliance request failed',
   )
+  return toCompliance(reviewed)
 }

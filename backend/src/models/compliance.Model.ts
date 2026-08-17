@@ -1,4 +1,4 @@
-import type { ObjectId } from 'mongodb'
+import type { Binary, ObjectId } from 'mongodb'
 
 export const compliancePriorities = ['Urgent', 'High', 'Medium', 'Low'] as const
 export type CompliancePriority = (typeof compliancePriorities)[number]
@@ -6,6 +6,7 @@ export type CompliancePriority = (typeof compliancePriorities)[number]
 export const complianceStatuses = [
   'In-progress',
   'Submitted',
+  'Partial',
   'Rejected',
   'Approved',
 ] as const
@@ -20,6 +21,11 @@ export interface EvidenceFileMetadata {
   uploadedAt: Date
   uploadedBy: string
   uploadedByEmail: string
+}
+
+export interface EvidenceFileDocument extends EvidenceFileMetadata {
+  complianceId: string
+  content: Buffer | Binary
 }
 
 export interface ComplianceSubmission {

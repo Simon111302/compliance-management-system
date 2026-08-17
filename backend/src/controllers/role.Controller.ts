@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express'
+import { recordActivity } from '../services/audit.Service.js'
 import {
   createRole as createRoleRecord,
   deleteRole as deleteRoleRecord,
@@ -49,6 +50,13 @@ export const createRole: RequestHandler = async (request, response, next) => {
       userId,
       type,
     })
+    await recordActivity(request.app.locals.database, request.user, {
+      action: 'CREATE',
+      entityType: 'Role',
+      entityId: role.roleId,
+      description: `Assigned ${type} role to user ${userId}`,
+      details: { roleType: type, userId },
+    })
     response.status(201).json(role)
   } catch (error) {
     next(error)
@@ -83,6 +91,13 @@ export const updateRole: RequestHandler<{ roleId: string }> = async (
       return
     }
 
+    await recordActivity(request.app.locals.database, request.user, {
+      action: 'UPDATE',
+      entityType: 'Role',
+      entityId: role.roleId,
+      description: `Updated role ${role.roleId}`,
+      details: { roleType: role.type, userId: role.userId },
+    })
     response.json(role)
   } catch (error) {
     next(error)
@@ -104,6 +119,12 @@ export const deleteRole: RequestHandler<{ roleId: string }> = async (
       return
     }
 
+    await recordActivity(request.app.locals.database, request.user, {
+      action: 'DELETE',
+      entityType: 'Role',
+      entityId: request.params.roleId,
+      description: `Deleted role ${request.params.roleId}`,
+    })
     response.status(204).end()
   } catch (error) {
     next(error)

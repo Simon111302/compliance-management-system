@@ -1,10 +1,16 @@
-import type { Compliance, ComplianceSummary, ReviewerPage } from '../../types'
+import type {
+  Compliance,
+  ComplianceSummary,
+  ReviewerPage,
+  UserRole,
+} from '../../types'
 import { PageHeader } from '../../views/components/PageHeader/PageHeader'
 import { PriorityBadge, StatusBadge } from '../../views/components/Badge/Badge'
 import './Dashboard.css'
 
 interface DashboardProps {
   compliances: readonly Compliance[]
+  role: UserRole | 'Administration'
   summary: ComplianceSummary
   onNavigate: (page: ReviewerPage) => void
   onOpenDetails: (complianceId: string) => void
@@ -12,16 +18,23 @@ interface DashboardProps {
 
 export function Dashboard({
   compliances,
+  role,
   summary,
   onNavigate,
   onOpenDetails,
 }: DashboardProps) {
+  const isReporter = role === 'Reporter'
+
   return (
     <>
       <PageHeader
-        eyebrow="Reviewer workspace"
+        eyebrow={`${role} workspace`}
         title="Compliance Dashboard"
-        description="Monitor submissions and focus on items that need a decision."
+        description={
+          isReporter
+            ? 'Monitor compliance records assigned to your account.'
+            : 'Monitor submissions and focus on items that need a decision.'
+        }
       />
       <div className="reviewer-content">
         <section

@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express'
+import { recordActivity } from '../services/audit.Service.js'
 import {
   createUser as createUserRecord,
   deleteUser as deleteUserRecord,
@@ -62,6 +63,13 @@ export const createUser: RequestHandler = async (request, response, next) => {
       passwordHash: hashPassword(password),
       ...(status === undefined ? {} : { status }),
     })
+    await recordActivity(request.app.locals.database, request.user, {
+      action: 'CREATE',
+      entityType: 'User',
+      entityId: user.userId,
+      description: `Created user ${user.name}`,
+      details: { userEmail: user.email },
+    })
     response.status(201).json(serializeUser(user))
   } catch (error) {
     next(error)
@@ -104,6 +112,20 @@ export const updateUser: RequestHandler<{ userId: string }> = async (
       return
     }
 
+    await recordActivity(request.app.locals.database, request.user, {
+      action: password === undefined ? 'UPDATE' : 'RESET_PASSWORD',
+      entityType: 'User',
+      entityId: user.userId,
+      description:
+        password === undefined
+          ? `Updated user ${user.name}`
+          : `Reset password for user ${user.name}`,
+      details: {
+        updatedFields: Object.keys(input).map((field) =>
+          field === 'passwordHash' ? 'password' : field,
+        ),
+      },
+    })
     response.json(serializeUser(user))
   } catch (error) {
     next(error)
@@ -125,6 +147,12 @@ export const deleteUser: RequestHandler<{ userId: string }> = async (
       return
     }
 
+    await recordActivity(request.app.locals.database, request.user, {
+      action: 'DELETE',
+      entityType: 'User',
+      entityId: request.params.userId,
+      description: `Deleted user ${request.params.userId}`,
+    })
     response.status(204).end()
   } catch (error) {
     next(error)

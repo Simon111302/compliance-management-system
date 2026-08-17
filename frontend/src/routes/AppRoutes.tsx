@@ -63,6 +63,7 @@ export function AppRoutes({
     return (
       <Dashboard
         compliances={compliances}
+        role={role}
         summary={summary}
         onNavigate={navigate}
         onOpenDetails={openDetails}
@@ -92,7 +93,7 @@ export function AppRoutes({
       />
     )
   if (page === 'submission') {
-    if (readOnly && role === 'Reporter') {
+    if (readOnly && role === 'Reporter' && !selectedCompliance?.submission) {
       return (
         <ComplianceSubmissionForm
           compliance={selectedCompliance}
@@ -132,7 +133,7 @@ export function AppRoutes({
   return (
     <ComplianceDetails
       canEdit={!readOnly}
-      canReview={!readOnly}
+      canReview={!readOnly && selectedCompliance?.status === 'Pending Evidence'}
       compliance={selectedCompliance}
       decision={decision}
       comments={reviewerComments}

@@ -16,8 +16,7 @@ import {
 const router = Router()
 const validateActionId = validateObjectIdParam('actionId')
 
-router.use(authenticate)
-router.use(requireRoles('Admin'))
+router.use('/reviewer-actions', authenticate, requireRoles('Admin'))
 
 router.get('/reviewer-actions', listReviewerActions)
 router.get('/reviewer-actions/:actionId', validateActionId, getReviewerAction)

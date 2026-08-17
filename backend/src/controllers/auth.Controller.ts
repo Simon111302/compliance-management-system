@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express'
+import { recordActivity } from '../services/audit.Service.js'
 import {
   authenticateCredentials,
   clearSessionCookie,
@@ -34,6 +35,12 @@ export const login: RequestHandler = async (request, response, next) => {
     }
 
     setSessionCookie(response, result.token)
+    await recordActivity(request.app.locals.database, result.user, {
+      action: 'LOGIN',
+      entityType: 'Session',
+      entityId: result.user.userId,
+      description: `${result.user.name} signed in`,
+    })
     response.json({
       id: result.user.userId,
       name: result.user.name,
@@ -59,6 +66,12 @@ export const currentUser: RequestHandler = (request, response) => {
 export const logout: RequestHandler = async (request, response, next) => {
   try {
     await deleteSession(request.app.locals.database, readSessionToken(request))
+    await recordActivity(request.app.locals.database, request.user, {
+      action: 'LOGOUT',
+      entityType: 'Session',
+      entityId: request.user.userId,
+      description: `${request.user.name} signed out`,
+    })
     clearSessionCookie(response)
     response.status(204).end()
   } catch (error) {
