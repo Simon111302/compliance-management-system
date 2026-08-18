@@ -1,5 +1,3 @@
-import { ActorForm } from '../pages/ActorForm/ActorForm'
-import { Actors } from '../pages/Actors/Actors'
 import { AdminDashboard } from '../pages/AdminDashboard/AdminDashboard'
 import { AdminSettings } from '../pages/AdminSettings/AdminSettings'
 import { AuditLogs } from '../pages/AuditLogs/AuditLogs'
@@ -50,30 +48,6 @@ export function AdminRoutes({ admin, reviewer }: AdminRoutesProps) {
         onUpdate={admin.updateUserForm}
         onCancel={() => admin.navigate('users')}
         onSubmit={admin.saveUser}
-      />
-    )
-  }
-
-  if (admin.page === 'reviewer-actions') {
-    return (
-      <Actors
-        actions={admin.reviewerActions}
-        onAdd={admin.openAddReviewerAction}
-        onEdit={admin.openEditReviewerAction}
-        onDelete={admin.removeReviewerAction}
-      />
-    )
-  }
-
-  if (admin.page === 'add-reviewer-action') {
-    return (
-      <ActorForm
-        editing={Boolean(admin.editingReviewerActionId)}
-        form={admin.reviewerActionForm}
-        reviewers={admin.reviewers}
-        onUpdate={admin.updateReviewerActionForm}
-        onCancel={() => admin.navigate('reviewer-actions')}
-        onSubmit={admin.saveReviewerAction}
       />
     )
   }

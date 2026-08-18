@@ -123,6 +123,7 @@ export function ComplianceList({
                     <td>
                       <div className="action-group">
                         <button
+                          className="secondary-button compact"
                           type="button"
                           onClick={() => onOpenDetails(compliance.id)}
                         >

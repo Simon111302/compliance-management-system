@@ -14,8 +14,6 @@ const adminPaths: Partial<Record<AdminPage, string>> = {
   'admin-dashboard': '/admin/dashboard',
   users: '/admin/users',
   'add-user': '/admin/users/new',
-  'reviewer-actions': '/admin/reviewer-actions',
-  'add-reviewer-action': '/admin/reviewer-actions/new',
   'admin-compliance': '/admin/compliances',
   'audit-logs': '/admin/audits',
   'admin-settings': '/admin/settings',
@@ -28,9 +26,6 @@ function workspacePrefix(role: UserRole): string {
 export function getAdminPath(page: AdminPage, resourceId?: string): string {
   if (page === 'add-user' && resourceId) {
     return `/admin/users/${encodeURIComponent(resourceId)}/edit`
-  }
-  if (page === 'add-reviewer-action' && resourceId) {
-    return `/admin/reviewer-actions/${encodeURIComponent(resourceId)}/edit`
   }
   return adminPaths[page] ?? '/admin/dashboard'
 }
@@ -60,16 +55,6 @@ export function getAdminRoute(pathname: string): AdminRouteState {
   const userEdit = pathname.match(/^\/admin\/users\/([^/]+)\/edit$/)
   if (userEdit?.[1]) {
     return { page: 'add-user', resourceId: decodeURIComponent(userEdit[1]) }
-  }
-
-  const actionEdit = pathname.match(
-    /^\/admin\/reviewer-actions\/([^/]+)\/edit$/,
-  )
-  if (actionEdit?.[1]) {
-    return {
-      page: 'add-reviewer-action',
-      resourceId: decodeURIComponent(actionEdit[1]),
-    }
   }
 
   if (pathname.startsWith('/admin/compliances')) {

@@ -9,6 +9,7 @@ import './ComplianceDetails.css'
 interface ComplianceDetailsProps {
   canEdit?: boolean
   canReview?: boolean
+  canRework?: boolean
   compliance: Compliance | null
   decision: ReviewDecision
   comments: string
@@ -23,6 +24,7 @@ interface ComplianceDetailsProps {
 export function ComplianceDetails({
   canEdit = true,
   canReview = true,
+  canRework = false,
   compliance,
   decision,
   comments,
@@ -62,6 +64,34 @@ export function ComplianceDetails({
         }
       />
       <div className="reviewer-content details-layout">
+        {canRework && (
+          <section
+            className={`review-feedback-banner details-feedback-banner review-feedback-${compliance.status.toLowerCase()}`}
+            role="status"
+          >
+            <div className="review-feedback-heading">
+              <div>
+                <p className="eyebrow">Reviewer Feedback</p>
+                <h2>
+                  {compliance.status === 'Partial'
+                    ? 'Changes are required'
+                    : 'Submission needs correction'}
+                </h2>
+              </div>
+              <span className="review-feedback-status">
+                {compliance.status}
+              </span>
+            </div>
+            <div className="review-feedback-note">
+              <strong>Reviewer note</strong>
+              <p>{compliance.reviewerComments || 'No comments provided.'}</p>
+            </div>
+            <p className="review-feedback-reminder">
+              Update the required fields and evidence, then open the form below
+              to resubmit the compliance for another review.
+            </p>
+          </section>
+        )}
         <div className="details-main">
           <section className="panel detail-card">
             <div className="detail-card-heading">
@@ -116,7 +146,7 @@ export function ComplianceDetails({
                     type="button"
                     onClick={() => onOpenSubmission(compliance.id)}
                   >
-                    View Form
+                    {canRework ? 'Edit and Resubmit' : 'View Form'}
                   </button>
                 </div>
                 {compliance.submission.evidence?.file && (

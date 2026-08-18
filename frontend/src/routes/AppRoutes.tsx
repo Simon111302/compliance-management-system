@@ -93,7 +93,15 @@ export function AppRoutes({
       />
     )
   if (page === 'submission') {
-    if (readOnly && role === 'Reporter' && !selectedCompliance?.submission) {
+    const reporterCanRework =
+      readOnly &&
+      role === 'Reporter' &&
+      ['Partial', 'Rejected'].includes(selectedCompliance?.status ?? '')
+    if (
+      readOnly &&
+      role === 'Reporter' &&
+      (!selectedCompliance?.submission || reporterCanRework)
+    ) {
       return (
         <ComplianceSubmissionForm
           compliance={selectedCompliance}
@@ -134,6 +142,11 @@ export function AppRoutes({
     <ComplianceDetails
       canEdit={!readOnly}
       canReview={!readOnly && selectedCompliance?.status === 'Pending Evidence'}
+      canRework={
+        readOnly &&
+        role === 'Reporter' &&
+        ['Partial', 'Rejected'].includes(selectedCompliance?.status ?? '')
+      }
       compliance={selectedCompliance}
       decision={decision}
       comments={reviewerComments}

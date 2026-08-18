@@ -16,7 +16,7 @@ export function AdminDashboard({ dashboard, onNavigate }: AdminDashboardProps) {
       <PageHeader
         eyebrow="Administration"
         title="Admin Dashboard"
-        description="Manage people, Reviewer actions, and compliance activity."
+        description="Manage people and compliance activity."
       />
       <div className="reviewer-content">
         <section className="admin-summary-grid">

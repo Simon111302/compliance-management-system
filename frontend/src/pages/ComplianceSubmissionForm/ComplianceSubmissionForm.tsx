@@ -96,7 +96,11 @@ export function ComplianceSubmissionForm({
         <div>
           <p className="eyebrow">{compliance.id}</p>
           <h1>{compliance.type}</h1>
-          <p>Complete the assigned compliance form and submit it for review.</p>
+          <p>
+            {compliance.status === 'Partial' || compliance.status === 'Rejected'
+              ? 'Update the returned form and resubmit it for review.'
+              : 'Complete the assigned compliance form and submit it for review.'}
+          </p>
         </div>
         <button
           className="secondary-button"
@@ -111,6 +115,35 @@ export function ComplianceSubmissionForm({
         className="panel submission-form"
         onSubmit={onSubmit}
       >
+        {(compliance.status === 'Partial' ||
+          compliance.status === 'Rejected') && (
+          <section
+            className={`review-feedback-banner review-feedback-${compliance.status.toLowerCase()}`}
+            role="status"
+          >
+            <div className="review-feedback-heading">
+              <div>
+                <p className="eyebrow">Reviewer Feedback</p>
+                <h2>
+                  {compliance.status === 'Partial'
+                    ? 'Changes are required'
+                    : 'Submission needs correction'}
+                </h2>
+              </div>
+              <span className="review-feedback-status">
+                {compliance.status}
+              </span>
+            </div>
+            <div className="review-feedback-note">
+              <strong>Reviewer note</strong>
+              <p>{compliance.reviewerComments || 'No comments provided.'}</p>
+            </div>
+            <p className="review-feedback-reminder">
+              Review the note, update the required fields and evidence, then
+              resubmit the compliance for another review.
+            </p>
+          </section>
+        )}
         <section className="submission-section">
           <h2>{definition.employeeTitle}</h2>
           <div className="submission-field-grid">
@@ -243,7 +276,12 @@ export function ComplianceSubmissionForm({
             disabled={submitting}
             type="submit"
           >
-            {submitting ? 'Submitting...' : 'Submit Compliance'}
+            {submitting
+              ? 'Submitting...'
+              : compliance.status === 'Partial' ||
+                  compliance.status === 'Rejected'
+                ? 'Resubmit Compliance'
+                : 'Submit Compliance'}
           </button>
         </div>
       </form>

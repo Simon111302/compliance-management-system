@@ -189,7 +189,9 @@ export function applyAutomaticComplianceStatus(
 ): Compliance {
   if (
     !compliance.dueDate ||
-    ['Approved', 'Rejected'].includes(compliance.status)
+    ['Approved', 'Partial', 'Rejected', 'Pending Evidence'].includes(
+      compliance.status,
+    )
   ) {
     return compliance
   }
@@ -337,7 +339,7 @@ export function normalizeSubmissionForm(
   submission: ComplianceSubmission | null | undefined,
 ): SubmissionForm {
   const empty = createSubmissionForm(type)
-  if (!submission || submission.type !== type) return empty
+  if (!submission || (submission.type && submission.type !== type)) return empty
 
   return {
     employeeInformation: {

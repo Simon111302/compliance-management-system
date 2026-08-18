@@ -4,7 +4,6 @@ import './AdminSidebar.css'
 const navigation: Array<[AdminPage, string]> = [
   ['admin-dashboard', 'Dashboard'],
   ['users', 'User Management'],
-  ['reviewer-actions', 'Reviewer Actions'],
   ['admin-compliance', 'Compliance'],
   ['audit-logs', 'Audit Logs'],
   ['admin-settings', 'Settings'],

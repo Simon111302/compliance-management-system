@@ -194,6 +194,15 @@ export const uploadEvidence: RequestHandler<{ id: string }> = async (
         .json({ message: 'Compliance is not assigned to you' })
       return
     }
+    if (!['In-progress', 'Partial', 'Rejected'].includes(compliance.status)) {
+      response.status(409).json({
+        message:
+          compliance.status === 'Approved'
+            ? 'Approved compliance cannot be changed'
+            : 'Compliance is awaiting review',
+      })
+      return
+    }
     if (!Buffer.isBuffer(request.body) || request.body.length === 0) {
       response.status(400).json({ message: 'Evidence file is required' })
       return
@@ -302,6 +311,15 @@ export const submitCompliance: RequestHandler<{ id: string }> = async (
         .json({ message: 'Compliance is not assigned to you' })
       return
     }
+    if (!['In-progress', 'Partial', 'Rejected'].includes(compliance.status)) {
+      response.status(409).json({
+        message:
+          compliance.status === 'Approved'
+            ? 'Approved compliance cannot be changed'
+            : 'Compliance is awaiting review',
+      })
+      return
+    }
 
     const validation = validateComplianceSubmission(
       compliance.type,
@@ -318,15 +336,19 @@ export const submitCompliance: RequestHandler<{ id: string }> = async (
       request.params.id,
       { ...validation.data },
     )
-    if (saved) {
-      await recordActivity(request.app.locals.database, request.user, {
-        action: 'SUBMIT',
-        entityType: 'Compliance',
-        entityId: saved.id,
-        description: `Submitted compliance ${saved.id}`,
-      })
+    if (!saved) {
+      response.status(409).json({ message: 'Compliance cannot be submitted' })
+      return
     }
-    response.json(saved ? { ...saved, reporter: request.user.name } : saved)
+    const resubmitted = ['Partial', 'Rejected'].includes(compliance.status)
+    await recordActivity(request.app.locals.database, request.user, {
+      action: 'SUBMIT',
+      entityType: 'Compliance',
+      entityId: saved.id,
+      description: `${resubmitted ? 'Resubmitted' : 'Submitted'} compliance ${saved.id}`,
+      details: { resubmitted },
+    })
+    response.json({ ...saved, reporter: request.user.name })
   } catch (error) {
     next(error)
   }

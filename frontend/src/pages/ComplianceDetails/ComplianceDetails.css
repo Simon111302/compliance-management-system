@@ -4,6 +4,12 @@
   align-items: start;
   gap: 22px;
 }
+.details-feedback-banner {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
 .details-main {
   display: grid;
   gap: 22px;

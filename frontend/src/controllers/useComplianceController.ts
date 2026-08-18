@@ -170,7 +170,13 @@ export function useComplianceController(
       }
 
       const compliance = compliances.find((item) => item.id === resourceId)
-      if (!compliance) return
+      if (!compliance) {
+        if (nextPage === 'details' || nextPage === 'submission') {
+          setPage('compliance')
+          setSelectedId(null)
+        }
+        return
+      }
 
       setSelectedId(resourceId)
       if (nextPage === 'details') {

@@ -49,17 +49,23 @@
   gap: 5px;
 }
 .action-group button {
-  padding: 5px 8px;
-  border: 0;
-  border-radius: 5px;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   color: var(--teal);
-  background: transparent;
+  background: #fff;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
 }
-.action-group button:hover {
+.action-group button:hover,
+.action-group button:focus-visible {
+  border-color: var(--teal);
   background: var(--teal-soft);
+}
+.action-group button:active {
+  background: #d5ebe7;
 }
 .compliance-name-link {
   display: grid;

@@ -1,5 +1,11 @@
 export type UserRole = 'Admin' | 'Reviewer' | 'Reporter'
 export type UserStatus = 'Active' | 'Inactive'
+
+export interface Reporter {
+  id: string
+  name: string
+}
+
 export type ComplianceType =
   | 'Government Contribution'
   | 'Tax Compliance'

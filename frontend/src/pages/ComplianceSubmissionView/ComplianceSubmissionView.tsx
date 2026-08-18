@@ -48,6 +48,35 @@ export function ComplianceSubmissionView({
         </section>
       ) : (
         <div className="panel submission-view">
+          {(compliance.status === 'Partial' ||
+            compliance.status === 'Rejected') && (
+            <section
+              className={`review-feedback-banner review-feedback-${compliance.status.toLowerCase()}`}
+              role="status"
+            >
+              <div className="review-feedback-heading">
+                <div>
+                  <p className="eyebrow">Reviewer Feedback</p>
+                  <h2>
+                    {compliance.status === 'Partial'
+                      ? 'Changes are required'
+                      : 'Submission needs correction'}
+                  </h2>
+                </div>
+                <span className="review-feedback-status">
+                  {compliance.status}
+                </span>
+              </div>
+              <div className="review-feedback-note">
+                <strong>Reviewer note</strong>
+                <p>{compliance.reviewerComments || 'No comments provided.'}</p>
+              </div>
+              <p className="review-feedback-reminder">
+                The Reporter must update the required fields and evidence, then
+                resubmit the compliance for another review.
+              </p>
+            </section>
+          )}
           <section className="submission-section">
             <h2>{definition.employeeTitle}</h2>
             <dl className="submission-data-grid">

@@ -3,7 +3,6 @@ import { getAdminDashboard } from '../services/admin.service'
 import { getErrorMessage } from '../types'
 import type { AdminDashboardData, AdminPage } from '../types'
 import { useAuditController } from './useAuditController'
-import { useReviewerActionController } from './useReviewerActionController'
 import { useUserController } from './useUserController'
 
 export function useAdminController(
@@ -28,12 +27,6 @@ export function useAdminController(
   )
 
   const users = useUserController(enabled, navigateTo, notify)
-  const reviewerActions = useReviewerActionController(
-    enabled,
-    users.reviewers,
-    navigateTo,
-    notify,
-  )
   const audits = useAuditController(notify)
 
   useEffect(() => {
@@ -63,37 +56,28 @@ export function useAdminController(
   )
 
   const syncUserPage = users.syncUserPage
-  const syncReviewerActionPage = reviewerActions.syncReviewerActionPage
   const syncPage = useCallback(
     (nextPage: AdminPage, resourceId?: string) => {
       setPage(nextPage)
       syncUserPage(nextPage, resourceId)
-      syncReviewerActionPage(nextPage, resourceId)
       if (nextPage === 'audit-logs') void loadAuditLogs()
     },
-    [loadAuditLogs, syncReviewerActionPage, syncUserPage],
+    [loadAuditLogs, syncUserPage],
   )
 
   return {
     auditLogs: audits.auditLogs,
     dashboard,
-    editingReviewerActionId: reviewerActions.editingReviewerActionId,
     editingUserId: users.editingUserId,
     filteredUsers: users.filteredUsers,
     navigate,
-    openAddReviewerAction: reviewerActions.openAddReviewerAction,
     openAddUser: users.openAddUser,
-    openEditReviewerAction: reviewerActions.openEditReviewerAction,
     openEditUser: users.openEditUser,
     page,
-    removeReviewerAction: reviewerActions.removeReviewerAction,
     removeUser: users.removeUser,
     resetPassword: users.resetPassword,
-    reviewerActionForm: reviewerActions.reviewerActionForm,
-    reviewerActions: reviewerActions.reviewerActions,
     reviewers: users.reviewers,
     roleFilter: users.roleFilter,
-    saveReviewerAction: reviewerActions.saveReviewerAction,
     saveUser: users.saveUser,
     search: users.search,
     setRoleFilter: users.setRoleFilter,
@@ -101,7 +85,6 @@ export function useAdminController(
     syncPage,
     toast,
     toggleUserStatus: users.toggleUserStatus,
-    updateReviewerActionForm: reviewerActions.updateReviewerActionForm,
     updateUserForm: users.updateUserForm,
     userForm: users.userForm,
   }

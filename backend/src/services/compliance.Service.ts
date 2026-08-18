@@ -58,7 +58,7 @@ export async function listCompliances(
   const filter: Filter<ComplianceDocument> = reporterId ? { reporterId } : {}
   const records = await compliances(database)
     .find(filter)
-    .sort({ dueDate: 1 })
+    .sort({ createdAt: -1, _id: -1 })
     .toArray()
   return addReporterNames(database, records)
 }
@@ -134,6 +134,12 @@ export async function saveEvidence(
     uploadedByEmail: string
   },
 ): Promise<ComplianceDocument | null> {
+  const compliance = await compliances(database).findOne({
+    id: complianceId,
+    status: { $in: ['In-progress', 'Partial', 'Rejected'] },
+  })
+  if (!compliance) return null
+
   const fileId = new ObjectId()
   const metadata: EvidenceFileMetadata = {
     fileId,
@@ -154,9 +160,20 @@ export async function saveEvidence(
   await database
     .collection<EvidenceFileDocument>('complianceEvidence')
     .insertOne(evidenceFile)
-  return updateCompliance(database, complianceId, {
-    evidence: [metadata],
-  })
+  const updated = await compliances(database).findOneAndUpdate(
+    {
+      id: complianceId,
+      status: { $in: ['In-progress', 'Partial', 'Rejected'] },
+    },
+    { $set: { evidence: [metadata], updatedAt: new Date() } },
+    { returnDocument: 'after' },
+  )
+  if (!updated) {
+    await database
+      .collection<EvidenceFileDocument>('complianceEvidence')
+      .deleteOne({ fileId })
+  }
+  return updated
 }
 
 export function submitCompliance(
@@ -164,10 +181,18 @@ export function submitCompliance(
   id: string,
   submission: ComplianceSubmission,
 ): Promise<ComplianceDocument | null> {
-  return updateCompliance(database, id, {
-    status: 'Submitted',
-    submission,
-  })
+  return compliances(database).findOneAndUpdate(
+    { id, status: { $in: ['In-progress', 'Partial', 'Rejected'] } },
+    {
+      $set: {
+        status: 'Submitted',
+        submission,
+        reviewerComments: '',
+        updatedAt: new Date(),
+      },
+    },
+    { returnDocument: 'after' },
+  )
 }
 
 export function reviewCompliance(
