@@ -7,7 +7,9 @@ function normalizeApiUrl(url: string | undefined): string {
   return normalizedUrl.endsWith('/v1') ? normalizedUrl : `${normalizedUrl}/v1`
 }
 
-export const apiUrl = normalizeApiUrl(configuredUrl)
+export const apiUrl = import.meta.env.PROD
+  ? '/v1'
+  : normalizeApiUrl(configuredUrl)
 
 export class ApiRequestError extends Error {
   constructor(
