@@ -35,16 +35,6 @@ export function AdminSidebar({
     <aside className="admin-sidebar">
       <div className="mobile-sidebar-header">
         <button
-          className="admin-brand"
-          type="button"
-          onClick={() => {
-            setMenuOpen(false)
-            onNavigate('admin-dashboard')
-          }}
-        >
-          Compliance System
-        </button>
-        <button
           className="sidebar-menu-toggle"
           type="button"
           aria-label={
@@ -56,6 +46,16 @@ export function AdminSidebar({
           <span />
           <span />
           <span />
+        </button>
+        <button
+          className="admin-brand"
+          type="button"
+          onClick={() => {
+            setMenuOpen(false)
+            onNavigate('admin-dashboard')
+          }}
+        >
+          Compliance System
         </button>
       </div>
       <div className={menuOpen ? 'sidebar-menu open' : 'sidebar-menu'}>

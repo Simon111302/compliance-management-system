@@ -78,16 +78,18 @@
   .admin-sidebar {
     position: static;
     width: 100%;
+    height: auto;
     padding: 10px 18px;
   }
   .mobile-sidebar-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 8px;
     min-height: 42px;
   }
   .admin-brand {
-    padding: 0 9px;
+    padding: 0;
   }
   .sidebar-menu-toggle {
     display: flex;
