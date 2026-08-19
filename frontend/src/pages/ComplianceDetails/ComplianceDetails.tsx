@@ -10,6 +10,7 @@ interface ComplianceDetailsProps {
   canEdit?: boolean
   canReview?: boolean
   canRework?: boolean
+  showAssignmentNote?: boolean
   compliance: Compliance | null
   decision: ReviewDecision
   comments: string
@@ -25,6 +26,7 @@ export function ComplianceDetails({
   canEdit = true,
   canReview = true,
   canRework = false,
+  showAssignmentNote = false,
   compliance,
   decision,
   comments,
@@ -64,32 +66,18 @@ export function ComplianceDetails({
         }
       />
       <div className="reviewer-content details-layout">
-        {canRework && (
+        {showAssignmentNote && compliance.notes && (
           <section
-            className={`review-feedback-banner details-feedback-banner review-feedback-${compliance.status.toLowerCase()}`}
-            role="status"
+            className="assignment-note-banner"
+            role="note"
           >
-            <div className="review-feedback-heading">
-              <div>
-                <p className="eyebrow">Reviewer Feedback</p>
-                <h2>
-                  {compliance.status === 'Partial'
-                    ? 'Changes are required'
-                    : 'Submission needs correction'}
-                </h2>
-              </div>
-              <span className="review-feedback-status">
-                {compliance.status}
-              </span>
+            <div>
+              <p className="eyebrow">Assignment Note</p>
+              <h2>
+                Assigned by {compliance.assignedByName || 'Administrator'}
+              </h2>
             </div>
-            <div className="review-feedback-note">
-              <strong>Reviewer note</strong>
-              <p>{compliance.reviewerComments || 'No comments provided.'}</p>
-            </div>
-            <p className="review-feedback-reminder">
-              Update the required fields and evidence, then open the form below
-              to resubmit the compliance for another review.
-            </p>
+            <p>{compliance.notes}</p>
           </section>
         )}
         <div className="details-main">
@@ -120,10 +108,6 @@ export function ComplianceDetails({
               <div>
                 <dt>Status</dt>
                 <dd>{compliance.status}</dd>
-              </div>
-              <div className="detail-wide">
-                <dt>Notes</dt>
-                <dd>{compliance.notes || 'No notes provided.'}</dd>
               </div>
             </dl>
           </section>

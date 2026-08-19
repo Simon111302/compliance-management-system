@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { AdminPage, AuthUser, NavigateHandler } from '../../../types'
 import './AdminSidebar.css'
 
@@ -22,6 +23,7 @@ export function AdminSidebar({
   onNavigate,
   user,
 }: AdminSidebarProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
   const initials = user.name
     .split(' ')
     .map((part) => part[0])
@@ -31,40 +33,66 @@ export function AdminSidebar({
 
   return (
     <aside className="admin-sidebar">
-      <button
-        className="admin-brand"
-        type="button"
-        onClick={() => onNavigate('admin-dashboard')}
-      >
-        Compliance System
-      </button>
-      <p className="admin-sidebar-label">Admin workspace</p>
-      <nav aria-label="Admin navigation">
-        {navigation.map(([page, label]) => (
-          <button
-            key={page}
-            className={activePage === page ? 'nav-item active' : 'nav-item'}
-            type="button"
-            onClick={() => onNavigate(page)}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
-      <div className="sidebar-spacer" />
-      <button
-        className="nav-item"
-        type="button"
-        onClick={onLogout}
-      >
-        Logout
-      </button>
-      <div className="reviewer-profile">
-        <span className="avatar">{initials}</span>
-        <span>
-          <strong>{user.name}</strong>
-          <small>{user.role}</small>
-        </span>
+      <div className="mobile-sidebar-header">
+        <button
+          className="admin-brand"
+          type="button"
+          onClick={() => {
+            setMenuOpen(false)
+            onNavigate('admin-dashboard')
+          }}
+        >
+          Compliance System
+        </button>
+        <button
+          className="sidebar-menu-toggle"
+          type="button"
+          aria-label={
+            menuOpen ? 'Close navigation menu' : 'Open navigation menu'
+          }
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((current) => !current)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </div>
+      <div className={menuOpen ? 'sidebar-menu open' : 'sidebar-menu'}>
+        <p className="admin-sidebar-label">Admin workspace</p>
+        <nav aria-label="Admin navigation">
+          {navigation.map(([page, label]) => (
+            <button
+              key={page}
+              className={activePage === page ? 'nav-item active' : 'nav-item'}
+              type="button"
+              onClick={() => {
+                setMenuOpen(false)
+                onNavigate(page)
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-spacer" />
+        <button
+          className="nav-item"
+          type="button"
+          onClick={() => {
+            setMenuOpen(false)
+            void onLogout()
+          }}
+        >
+          Logout
+        </button>
+        <div className="reviewer-profile">
+          <span className="avatar">{initials}</span>
+          <span>
+            <strong>{user.name}</strong>
+            <small>{user.role}</small>
+          </span>
+        </div>
       </div>
     </aside>
   )

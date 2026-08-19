@@ -7,6 +7,7 @@ import userRoutes from './routes/user.routes.js'
 import complianceRoutes from './routes/compliance.routes.js'
 import reviewerActionRoutes from './routes/reviewer-action.routes.js'
 import auditRoutes from './routes/audit.routes.js'
+import notificationRoutes from './routes/notification.routes.js'
 import { errorMiddleware } from './middleware/error.middleware.js'
 import { evidenceUpload } from './middleware/upload.middleware.js'
 
@@ -42,6 +43,7 @@ export function createApp(database: Db): Express {
   app.use('/v1', userRoutes)
   app.use('/v1', reviewerActionRoutes)
   app.use('/v1', auditRoutes)
+  app.use('/v1', notificationRoutes)
   app.use('/v1/compliances', complianceRoutes)
   app.use(errorMiddleware)
 
@@ -64,6 +66,12 @@ export async function prepareDatabase(database: Db): Promise<void> {
       .collection('auditLogs')
       .createIndex({ auditId: 1 }, { unique: true }),
     database.collection('auditLogs').createIndex({ createdAt: -1 }),
+    database
+      .collection('notifications')
+      .createIndex({ userId: 1, createdAt: -1 }),
+    database
+      .collection('notifications')
+      .createIndex({ notificationId: 1 }, { unique: true }),
   ])
 }
 

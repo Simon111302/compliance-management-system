@@ -1,5 +1,15 @@
+import dns from 'node:dns'
 import { MongoClient, type Db } from 'mongodb'
-import { databaseName, mongoUri } from './env.js'
+import { databaseName, mongoUri, mongodbDnsServers } from './env.js'
+
+if (mongodbDnsServers) {
+  dns.setServers(
+    mongodbDnsServers
+      .split(',')
+      .map((server) => server.trim())
+      .filter(Boolean),
+  )
+}
 
 const client = new MongoClient(mongoUri)
 let database: Db | undefined

@@ -25,7 +25,8 @@ export interface EvidenceFileMetadata {
 
 export interface EvidenceFileDocument extends EvidenceFileMetadata {
   complianceId: string
-  content: Buffer | Binary
+  s3Key?: string
+  content?: Buffer | Binary
 }
 
 export interface ComplianceSubmission {
@@ -42,6 +43,8 @@ export interface ComplianceDocument {
   priority: CompliancePriority
   status: ComplianceStatus
   notes: string
+  assignedByName: string
+  assignedByEmail: string
   evidence: EvidenceFileMetadata[]
   submission: ComplianceSubmission | null
   reviewerComments: string
@@ -58,6 +61,8 @@ export interface ComplianceInput {
   priority: CompliancePriority
   status?: ComplianceStatus
   notes?: string
+  assignedByName: string
+  assignedByEmail: string
 }
 
 export function createComplianceDocument(
@@ -73,6 +78,8 @@ export function createComplianceDocument(
     priority: input.priority,
     status: input.status ?? 'In-progress',
     notes: input.notes?.trim() ?? '',
+    assignedByName: input.assignedByName,
+    assignedByEmail: input.assignedByEmail,
     evidence: [],
     submission: null,
     reviewerComments: '',

@@ -229,6 +229,15 @@
   padding: 22px 26px;
 }
 
+@media (max-width: 860px) {
+  .submission-field-grid {
+    grid-template-columns: 1fr;
+  }
+  .submission-field-grid .field-wide {
+    grid-column: auto;
+  }
+}
+
 @media (max-width: 720px) {
   .reporter-submission-page {
     padding: 20px 14px 40px;
@@ -260,6 +269,21 @@
   .review-feedback-heading {
     flex-direction: column;
     gap: 10px;
+  }
+  .submission-table-wrap {
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .submission-table {
+    min-width: 680px;
+  }
+  .submission-table th,
+  .submission-table td {
+    min-width: 130px;
+    padding: 8px;
+  }
+  .submission-table th:first-child {
+    min-width: 150px;
   }
   .submission-actions {
     flex-direction: column-reverse;

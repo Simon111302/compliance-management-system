@@ -25,19 +25,39 @@
   display: flex;
   gap: 8px;
 }
+.desktop-notification {
+  display: block;
+}
 
-@media (max-width: 980px) {
+@media (max-width: 840px) {
   .reviewer-topbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
     padding-left: 25px;
     padding-right: 25px;
+  }
+  .reviewer-topbar > div:first-child {
+    min-width: 0;
+    flex: 1 1 420px;
   }
 }
 @media (max-width: 720px) {
   .reviewer-topbar {
+    position: relative;
     min-height: auto;
     align-items: flex-start;
     flex-direction: column;
-    padding: 22px 18px;
+    padding: 22px 74px 22px 18px;
+  }
+  .reviewer-topbar > div:first-child {
+    flex: none;
+    width: 100%;
+  }
+  .reviewer-topbar > .desktop-notification {
+    position: absolute;
+    top: 22px;
+    right: 18px;
+    width: auto;
   }
   .reviewer-topbar > .primary-button {
     width: 100%;

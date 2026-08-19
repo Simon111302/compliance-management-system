@@ -9,6 +9,7 @@ import { useAdminController } from './controllers/useAdminController'
 import { useAuthController } from './controllers/useAuthController'
 import { useReporterController } from './controllers/useReporterController'
 import { useReviewerController } from './controllers/useReviewerController'
+import { useNotificationController } from './controllers/useNotificationController'
 import {
   getAdminCompliancePath,
   getAdminComplianceRoute,
@@ -26,6 +27,9 @@ function App() {
   const isAdmin = auth.user?.role === 'Admin'
   const isReviewer = auth.user?.role === 'Reviewer'
   const isReporter = auth.user?.role === 'Reporter'
+  const notifications = useNotificationController(
+    authenticated && (isReviewer || isReporter),
+  )
   const admin = useAdminController(
     authenticated && isAdmin,
     (page, resourceId) => {
@@ -168,6 +172,7 @@ function App() {
       <main className="reviewer-main">
         <AppRoutes
           controller={workspace}
+          notifications={notifications}
           readOnly={isReporter}
           role={auth.user.role}
         />

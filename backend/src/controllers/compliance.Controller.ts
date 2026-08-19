@@ -2,6 +2,10 @@ import type { RequestHandler } from 'express'
 import type { ComplianceInput } from '../models/compliance.Model.js'
 import { recordActivity } from '../services/audit.Service.js'
 import {
+  createNotifications,
+  listActiveReviewerIds,
+} from '../services/notification.Service.js'
+import {
   createCompliance as createComplianceRecord,
   deleteCompliance as deleteComplianceRecord,
   getCompliance as getComplianceRecord,
@@ -98,6 +102,8 @@ export const createCompliance: RequestHandler = async (
     reporterId,
     dueDate,
     priority,
+    assignedByName: request.user.name,
+    assignedByEmail: request.user.email,
     ...(status === undefined ? {} : { status }),
     ...(notes === undefined ? {} : { notes }),
   }
@@ -114,6 +120,15 @@ export const createCompliance: RequestHandler = async (
       description: `Created compliance ${compliance.id}`,
       details: { complianceName: compliance.name },
     })
+    await createNotifications(request.app.locals.database, [
+      {
+        userId: compliance.reporterId,
+        type: 'ComplianceAssigned',
+        title: 'New compliance assigned',
+        message: `${request.user.name} assigned ${compliance.name} to you.`,
+        complianceId: compliance.id,
+      },
+    ])
     response.status(201).json(compliance)
   } catch (error) {
     next(error)
@@ -271,9 +286,7 @@ export const downloadEvidence: RequestHandler<{
       return
     }
 
-    const content = Buffer.isBuffer(file.content)
-      ? file.content
-      : file.content.buffer
+    const content = file.content
     const filename = file.filename.replace(/["\r\n]/g, '_')
     response.setHeader('Content-Type', file.contentType)
     response.setHeader('Content-Length', String(content.length))
@@ -341,13 +354,26 @@ export const submitCompliance: RequestHandler<{ id: string }> = async (
       return
     }
     const resubmitted = ['Partial', 'Rejected'].includes(compliance.status)
-    await recordActivity(request.app.locals.database, request.user, {
-      action: 'SUBMIT',
-      entityType: 'Compliance',
-      entityId: saved.id,
-      description: `${resubmitted ? 'Resubmitted' : 'Submitted'} compliance ${saved.id}`,
-      details: { resubmitted },
-    })
+    const [reviewerIds] = await Promise.all([
+      listActiveReviewerIds(request.app.locals.database),
+      recordActivity(request.app.locals.database, request.user, {
+        action: 'SUBMIT',
+        entityType: 'Compliance',
+        entityId: saved.id,
+        description: `${resubmitted ? 'Resubmitted' : 'Submitted'} compliance ${saved.id}`,
+        details: { resubmitted },
+      }),
+    ])
+    await createNotifications(
+      request.app.locals.database,
+      reviewerIds.map((reviewerId) => ({
+        userId: reviewerId,
+        type: 'ComplianceSubmitted' as const,
+        title: resubmitted ? 'Compliance resubmitted' : 'Compliance submitted',
+        message: `${request.user.name} ${resubmitted ? 'resubmitted' : 'submitted'} ${saved.name} for review.`,
+        complianceId: saved.id,
+      })),
+    )
     response.json({ ...saved, reporter: request.user.name })
   } catch (error) {
     next(error)
@@ -398,13 +424,29 @@ export const reviewCompliance: RequestHandler<{ id: string }> = async (
       response.status(409).json({ message: 'Compliance was already reviewed' })
       return
     }
-    await recordActivity(request.app.locals.database, request.user, {
-      action: 'REVIEW',
-      entityType: 'Compliance',
-      entityId: reviewed.id,
-      description: `Reviewed compliance ${reviewed.id}: ${decision}`,
-      details: { decision },
-    })
+    const decisionStatus = {
+      Approve: 'Approved',
+      Partial: 'Partial',
+      Reject: 'Rejected',
+    } as const
+    await Promise.all([
+      recordActivity(request.app.locals.database, request.user, {
+        action: 'REVIEW',
+        entityType: 'Compliance',
+        entityId: reviewed.id,
+        description: `Reviewed compliance ${reviewed.id}: ${decision}`,
+        details: { decision },
+      }),
+      createNotifications(request.app.locals.database, [
+        {
+          userId: reviewed.reporterId,
+          type: 'ComplianceReviewed',
+          title: `Compliance ${decisionStatus[decision]}`,
+          message: `${request.user.name} marked ${reviewed.name} as ${decisionStatus[decision]}.`,
+          complianceId: reviewed.id,
+        },
+      ]),
+    ])
     response.json(reviewed)
   } catch (error) {
     next(error)

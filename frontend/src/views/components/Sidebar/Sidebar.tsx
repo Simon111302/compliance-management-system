@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { AuthUser, NavigateHandler, ReviewerPage } from '../../../types'
 import './Sidebar.css'
 
@@ -14,6 +15,7 @@ export function Sidebar({
   onNavigate,
   user,
 }: SidebarProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
   const isReviewer = user.role === 'Reviewer'
   const workspace = isReviewer ? 'Reviewer workspace' : 'Reporter workspace'
   const initials = user.name
@@ -25,59 +27,88 @@ export function Sidebar({
 
   return (
     <aside className="reviewer-sidebar">
-      <button
-        className="reviewer-brand"
-        type="button"
-        onClick={() => onNavigate('dashboard')}
-      >
-        Compliance
-      </button>
-      <p className="sidebar-label">{workspace}</p>
-      <nav aria-label={`${user.role} navigation`}>
+      <div className="mobile-sidebar-header">
         <button
-          className={
-            activePage === 'dashboard' ? 'nav-item active' : 'nav-item'
-          }
+          className="sidebar-menu-toggle"
           type="button"
-          onClick={() => onNavigate('dashboard')}
+          aria-label={
+            menuOpen ? 'Close navigation menu' : 'Open navigation menu'
+          }
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((current) => !current)}
         >
-          Dashboard
+          <span />
+          <span />
+          <span />
         </button>
         <button
-          className={
-            ['compliance', 'create', 'details', 'submission'].includes(
-              activePage,
-            )
-              ? 'nav-item active'
-              : 'nav-item'
-          }
+          className="reviewer-brand"
           type="button"
-          onClick={() => onNavigate('compliance')}
+          onClick={() => {
+            setMenuOpen(false)
+            onNavigate('dashboard')
+          }}
         >
           Compliance
         </button>
-      </nav>
-      <div className="sidebar-spacer" />
-      <div className="sidebar-divider" />
-      <button
-        className="nav-item"
-        type="button"
-      >
-        Settings
-      </button>
-      <button
-        className="nav-item"
-        type="button"
-        onClick={onLogout}
-      >
-        Logout
-      </button>
-      <div className="reviewer-profile">
-        <span className="avatar">{initials}</span>
-        <span>
-          <strong>{user.name}</strong>
-          <small>{user.role}</small>
-        </span>
+      </div>
+      <div className={menuOpen ? 'sidebar-menu open' : 'sidebar-menu'}>
+        <p className="sidebar-label">{workspace}</p>
+        <nav aria-label={`${user.role} navigation`}>
+          <button
+            className={
+              activePage === 'dashboard' ? 'nav-item active' : 'nav-item'
+            }
+            type="button"
+            onClick={() => {
+              setMenuOpen(false)
+              onNavigate('dashboard')
+            }}
+          >
+            Dashboard
+          </button>
+          <button
+            className={
+              ['compliance', 'create', 'details', 'submission'].includes(
+                activePage,
+              )
+                ? 'nav-item active'
+                : 'nav-item'
+            }
+            type="button"
+            onClick={() => {
+              setMenuOpen(false)
+              onNavigate('compliance')
+            }}
+          >
+            Compliance
+          </button>
+        </nav>
+        <div className="sidebar-spacer" />
+        <div className="sidebar-divider" />
+        <button
+          className="nav-item"
+          type="button"
+        >
+          Settings
+        </button>
+        <button
+          className="nav-item"
+          type="button"
+          onClick={() => {
+            setMenuOpen(false)
+            void onLogout()
+          }}
+        >
+          Logout
+        </button>
+        <div className="reviewer-profile">
+          <span className="avatar">{initials}</span>
+          <span>
+            <strong>{user.name}</strong>
+            <small>{user.role}</small>
+          </span>
+        </div>
       </div>
     </aside>
   )

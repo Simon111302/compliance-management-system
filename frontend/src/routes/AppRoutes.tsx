@@ -5,19 +5,23 @@ import { ComplianceDetails } from '../pages/ComplianceDetails/ComplianceDetails'
 import { ComplianceSubmissionForm } from '../pages/ComplianceSubmissionForm/ComplianceSubmissionForm'
 import { ComplianceSubmissionView } from '../pages/ComplianceSubmissionView/ComplianceSubmissionView'
 import type { CompliancePriority, ComplianceType, UserRole } from '../types'
+import type { useNotificationController } from '../controllers/useNotificationController'
 import type { useReviewerController } from '../controllers/useReviewerController'
 
+type NotificationController = ReturnType<typeof useNotificationController>
 type ReviewerController = ReturnType<typeof useReviewerController>
 type WorkspaceRole = UserRole | 'Administration'
 
 interface AppRoutesProps {
   controller: ReviewerController
+  notifications?: NotificationController
   readOnly?: boolean
   role?: WorkspaceRole
 }
 
 export function AppRoutes({
   controller,
+  notifications,
   readOnly = false,
   role = 'Reviewer',
 }: AppRoutesProps) {
@@ -63,8 +67,12 @@ export function AppRoutes({
     return (
       <Dashboard
         compliances={compliances}
+        notifications={notifications?.notifications ?? []}
         role={role}
         summary={summary}
+        unreadNotificationCount={notifications?.unreadCount ?? 0}
+        onMarkAllNotificationsRead={notifications?.markAllRead ?? (() => {})}
+        onMarkNotificationRead={notifications?.markRead ?? (() => {})}
         onNavigate={navigate}
         onOpenDetails={openDetails}
       />
@@ -147,6 +155,7 @@ export function AppRoutes({
         role === 'Reporter' &&
         ['Partial', 'Rejected'].includes(selectedCompliance?.status ?? '')
       }
+      showAssignmentNote={role === 'Reporter'}
       compliance={selectedCompliance}
       decision={decision}
       comments={reviewerComments}

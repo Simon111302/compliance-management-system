@@ -340,7 +340,7 @@ export function useComplianceController(
         const saved = applyAutomaticComplianceStatus(
           await addCompliance(created),
         )
-        setCompliances((items) => [...items, saved])
+        setCompliances((items) => [saved, ...items])
         notify(`${saved.id} created`)
       }
 

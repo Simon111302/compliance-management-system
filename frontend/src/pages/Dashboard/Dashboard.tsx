@@ -1,25 +1,35 @@
 import type {
   Compliance,
   ComplianceSummary,
+  Notification,
   ReviewerPage,
   UserRole,
 } from '../../types'
 import { PageHeader } from '../../views/components/PageHeader/PageHeader'
 import { PriorityBadge, StatusBadge } from '../../views/components/Badge/Badge'
+import { NotificationBell } from '../../views/components/NotificationBell/NotificationBell'
 import './Dashboard.css'
 
 interface DashboardProps {
   compliances: readonly Compliance[]
+  notifications: readonly Notification[]
   role: UserRole | 'Administration'
   summary: ComplianceSummary
+  unreadNotificationCount: number
+  onMarkAllNotificationsRead: () => void | Promise<void>
+  onMarkNotificationRead: (notificationId: string) => void | Promise<void>
   onNavigate: (page: ReviewerPage) => void
   onOpenDetails: (complianceId: string) => void
 }
 
 export function Dashboard({
   compliances,
+  notifications,
   role,
   summary,
+  unreadNotificationCount,
+  onMarkAllNotificationsRead,
+  onMarkNotificationRead,
   onNavigate,
   onOpenDetails,
 }: DashboardProps) {
@@ -34,6 +44,23 @@ export function Dashboard({
           isReporter
             ? 'Monitor compliance records assigned to your account.'
             : 'Monitor submissions and focus on items that need a decision.'
+        }
+        action={
+          role !== 'Administration' ? (
+            <div className="desktop-notification">
+              <NotificationBell
+                notifications={notifications}
+                unreadCount={unreadNotificationCount}
+                onMarkAllRead={onMarkAllNotificationsRead}
+                onOpen={async (notification) => {
+                  if (!notification.readAt) {
+                    await onMarkNotificationRead(notification.notificationId)
+                  }
+                  onOpenDetails(notification.complianceId)
+                }}
+              />
+            </div>
+          ) : undefined
         }
       />
       <div className="reviewer-content">

@@ -36,6 +36,8 @@ export interface Compliance {
   priority: CompliancePriority
   status: ComplianceStatus
   notes: string
+  assignedByName?: string
+  assignedByEmail?: string
   submission: ComplianceSubmission | null
   reviewerComments: string
 }

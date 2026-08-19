@@ -8,6 +8,9 @@ interface BackendEnvironment {
   ADMIN_NAME?: string
   ADMIN_EMAIL?: string
   ADMIN_PASSWORD?: string
+  AWS_REGION?: string
+  S3_EVIDENCE_BUCKET?: string
+  MONGODB_DNS_SERVERS?: string
 }
 
 const environment = process.env as BackendEnvironment
@@ -32,9 +35,16 @@ if (
   )
 }
 
+if (!environment.AWS_REGION || !environment.S3_EVIDENCE_BUCKET) {
+  throw new Error('AWS_REGION and S3_EVIDENCE_BUCKET must be defined in .env')
+}
+
 export const mongoUri = environment.MONGODB_URI
 export const databaseName = environment.MONGODB_DATABASE
 export const frontendOrigin = environment.FRONTEND_ORIGIN
 export const adminName = environment.ADMIN_NAME
 export const adminEmail = environment.ADMIN_EMAIL
 export const adminPassword = environment.ADMIN_PASSWORD
+export const awsRegion = environment.AWS_REGION
+export const evidenceBucket = environment.S3_EVIDENCE_BUCKET
+export const mongodbDnsServers = environment.MONGODB_DNS_SERVERS

@@ -93,12 +93,13 @@
   outline-offset: 3px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 860px) {
   .list-tools {
     align-items: stretch;
     flex-direction: column;
   }
   .list-tools .search-field,
+  .list-tools .select-field,
   .select-field select {
     width: 100%;
   }

@@ -9,6 +9,11 @@ import {
 } from '../models/compliance.Model.js'
 import type { ReviewDecision } from '../types/reviewer-action.types.js'
 import type { UserDocument } from '../models/user.Model.js'
+import {
+  deleteEvidenceObject,
+  downloadEvidenceObject,
+  uploadEvidenceObject,
+} from './s3.service.js'
 
 export type UpdateComplianceInput = Partial<
   Omit<ComplianceDocument, '_id' | 'id' | 'createdAt' | 'updatedAt'>
@@ -141,6 +146,7 @@ export async function saveEvidence(
   if (!compliance) return null
 
   const fileId = new ObjectId()
+  const s3Key = `compliances/${complianceId}/${fileId.toHexString()}`
   const metadata: EvidenceFileMetadata = {
     fileId,
     filename: file.filename,
@@ -154,26 +160,36 @@ export async function saveEvidence(
   const evidenceFile: EvidenceFileDocument = {
     ...metadata,
     complianceId,
-    content: file.content,
+    s3Key,
   }
 
-  await database
-    .collection<EvidenceFileDocument>('complianceEvidence')
-    .insertOne(evidenceFile)
-  const updated = await compliances(database).findOneAndUpdate(
-    {
-      id: complianceId,
-      status: { $in: ['In-progress', 'Partial', 'Rejected'] },
-    },
-    { $set: { evidence: [metadata], updatedAt: new Date() } },
-    { returnDocument: 'after' },
-  )
-  if (!updated) {
+  await uploadEvidenceObject(s3Key, file.content, file.contentType)
+  try {
+    await database
+      .collection<EvidenceFileDocument>('complianceEvidence')
+      .insertOne(evidenceFile)
+    const updated = await compliances(database).findOneAndUpdate(
+      {
+        id: complianceId,
+        status: { $in: ['In-progress', 'Partial', 'Rejected'] },
+      },
+      { $set: { evidence: [metadata], updatedAt: new Date() } },
+      { returnDocument: 'after' },
+    )
+    if (!updated) {
+      await database
+        .collection<EvidenceFileDocument>('complianceEvidence')
+        .deleteOne({ fileId })
+      await deleteEvidenceObject(s3Key)
+    }
+    return updated
+  } catch (error) {
     await database
       .collection<EvidenceFileDocument>('complianceEvidence')
       .deleteOne({ fileId })
+    await deleteEvidenceObject(s3Key)
+    throw error
   }
-  return updated
 }
 
 export function submitCompliance(
@@ -224,15 +240,26 @@ export async function getEvidenceFile(
   database: Db,
   complianceId: string,
   fileId: string,
-): Promise<EvidenceFileDocument | null> {
+): Promise<(EvidenceFileDocument & { content: Buffer }) | null> {
   if (!ObjectId.isValid(fileId)) return null
 
-  return database
+  const file = await database
     .collection<EvidenceFileDocument>('complianceEvidence')
     .findOne({
       complianceId,
       fileId: new ObjectId(fileId),
     })
+  if (!file) return null
+
+  if (file.s3Key) {
+    return { ...file, content: await downloadEvidenceObject(file.s3Key) }
+  }
+  if (!file.content) return null
+
+  const content = Buffer.isBuffer(file.content)
+    ? file.content
+    : Buffer.from(file.content.buffer)
+  return { ...file, content }
 }
 
 export async function deleteCompliance(

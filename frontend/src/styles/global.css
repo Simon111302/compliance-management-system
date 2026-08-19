@@ -156,7 +156,13 @@ h2 {
 
 .table-wrap {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.table-wrap table {
+  min-width: 680px;
 }
 table {
   width: 100%;
@@ -272,9 +278,9 @@ td small {
   font-size: 13px;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 840px) {
   .reviewer-main {
-    margin-left: 210px;
+    margin-left: 0;
   }
   .reviewer-content {
     padding-left: 25px;
@@ -287,5 +293,27 @@ td small {
   }
   .reviewer-content {
     padding: 20px 14px 40px;
+  }
+  .panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 18px 16px;
+  }
+  .panel-heading .text-button {
+    min-height: 32px;
+  }
+  th,
+  td {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .toast {
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    max-width: none;
+    overflow-wrap: anywhere;
   }
 }
