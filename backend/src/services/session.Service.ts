@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { ObjectId, type Db } from 'mongodb'
+import { frontendOrigin } from '../config/env.js'
 import type { RoleDocument, UserRole } from '../models/role.Model.js'
 import { activeUserFilter, type UserDocument } from '../models/user.Model.js'
 import type { SessionDocument } from '../types/auth.types.js'
@@ -14,6 +15,9 @@ import { normalizeEmail } from '../utils/helpers/normalizeEmail.js'
 const cookieName = 'compliance_session'
 const sessionDays = 7
 const sessionMaxAge = sessionDays * 24 * 60 * 60
+const sessionCookieSecurity = frontendOrigin.startsWith('https://')
+  ? 'SameSite=None; Secure'
+  : 'SameSite=Lax'
 
 function resolveRole(type: RoleDocument['type']): UserRole {
   if (type === 'admin') return 'Admin'
@@ -99,13 +103,13 @@ export async function deleteSession(
 export function setSessionCookie(response: Response, token: string): void {
   response.setHeader(
     'Set-Cookie',
-    `${cookieName}=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${sessionMaxAge}`,
+    `${cookieName}=${token}; HttpOnly; Path=/; ${sessionCookieSecurity}; Max-Age=${sessionMaxAge}`,
   )
 }
 
 export function clearSessionCookie(response: Response): void {
   response.setHeader(
     'Set-Cookie',
-    `${cookieName}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0`,
+    `${cookieName}=; HttpOnly; Path=/; ${sessionCookieSecurity}; Max-Age=0`,
   )
 }
