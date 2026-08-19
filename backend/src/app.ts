@@ -22,9 +22,20 @@ export function createApp(database: Db): Express {
       return
     }
 
+    if (origin) {
+      response.setHeader('Access-Control-Allow-Origin', origin)
+      response.setHeader('Access-Control-Allow-Credentials', 'true')
+      response.setHeader('Vary', 'Origin')
+    }
+    response.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    response.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,POST,PUT,PATCH,DELETE')
     response.setHeader('X-Content-Type-Options', 'nosniff')
     response.setHeader('X-Frame-Options', 'DENY')
     response.setHeader('Referrer-Policy', 'no-referrer')
+    if (request.method === 'OPTIONS') {
+      response.sendStatus(204)
+      return
+    }
     next()
   })
   app.use(express.json({ limit: '100kb' }))
