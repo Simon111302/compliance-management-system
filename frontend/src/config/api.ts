@@ -1,6 +1,13 @@
 const configuredUrl = import.meta.env.VITE_API_URL?.trim()
 
-export const apiUrl = configuredUrl ? configuredUrl.replace(/\/$/, '') : '/v1'
+function normalizeApiUrl(url: string | undefined): string {
+  if (!url) return '/v1'
+
+  const normalizedUrl = url.replace(/\/$/, '')
+  return normalizedUrl.endsWith('/v1') ? normalizedUrl : `${normalizedUrl}/v1`
+}
+
+export const apiUrl = normalizeApiUrl(configuredUrl)
 
 export class ApiRequestError extends Error {
   constructor(
