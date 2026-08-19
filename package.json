@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --config frontend/vite.config.ts",
     "dev:api": "tsx watch backend/src/server.ts",
+    "start": "npm run start:api",
     "start:api": "node backend/dist/server.js",
     "build": "npm run typecheck && npm run build:frontend && npm run build:api",
     "build:frontend": "vite build --config frontend/vite.config.ts",
