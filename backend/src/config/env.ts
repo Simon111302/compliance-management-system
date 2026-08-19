@@ -42,6 +42,12 @@ if (!environment.AWS_REGION || !environment.S3_EVIDENCE_BUCKET) {
 export const mongoUri = environment.MONGODB_URI
 export const databaseName = environment.MONGODB_DATABASE
 export const frontendOrigin = environment.FRONTEND_ORIGIN
+export const allowedFrontendOrigins = new Set([
+  frontendOrigin,
+  ...(process.env.NODE_ENV === 'production'
+    ? []
+    : ['http://localhost:5173', 'http://127.0.0.1:5173']),
+])
 export const adminName = environment.ADMIN_NAME
 export const adminEmail = environment.ADMIN_EMAIL
 export const adminPassword = environment.ADMIN_PASSWORD

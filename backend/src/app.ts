@@ -1,7 +1,7 @@
 import express, { type Express } from 'express'
 import type { Db } from 'mongodb'
 import { connectDatabase } from './config/database.js'
-import { databaseName, frontendOrigin } from './config/env.js'
+import { allowedFrontendOrigins, databaseName } from './config/env.js'
 import authRoutes from './routes/auth.routes.js'
 import userRoutes from './routes/user.routes.js'
 import complianceRoutes from './routes/compliance.routes.js'
@@ -17,7 +17,7 @@ export function createApp(database: Db): Express {
   app.disable('x-powered-by')
   app.use((request, response, next) => {
     const origin = request.get('origin')
-    if (origin && origin !== frontendOrigin) {
+    if (origin && !allowedFrontendOrigins.has(origin)) {
       response.status(403).json({ message: 'Origin is not allowed' })
       return
     }

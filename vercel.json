@@ -1,3 +1,9 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "rewrites": [
+    {
+      "source": "/v1/:path*",
+      "destination": "https://compliance-management-system-production-68c9.up.railway.app/v1/:path*"
+    },
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }
